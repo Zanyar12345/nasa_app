@@ -1,26 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700;900&family=Press+Start+2P&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #F8FAFC;
+  --foreground: #0F172A;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ───────── Crisp Daylight Blueprint Background Grid ───────── */
+.bg-blueprint-grid {
+  background-color: #F8FAFC;
+  background-image: 
+    linear-gradient(to right, rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ───────── Clean Daylight Blueprint Cards ───────── */
+.nasa-card, .hk-frame, .silksong-frame {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+}
+
+.nasa-subcard, .silksong-subcard {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+/* ───────── Subtle Floating / Breathing Animations ───────── */
+@keyframes zero-g-drift {
+  0%   { transform: translateY(0px)   rotate(0deg); }
+  25%  { transform: translateY(-5px)  rotate(0.2deg); }
+  50%  { transform: translateY(-10px) rotate(-0.2deg); }
+  75%  { transform: translateY(-4px)  rotate(0.1deg); }
+  100% { transform: translateY(0px)   rotate(0deg); }
+}
+
+@keyframes idle-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes zero-g-shadow {
+  0%, 100% { transform: scale(1);    opacity: 0.15; }
+  50%       { transform: scale(0.85); opacity: 0.07; }
+}
+
+@keyframes silk-breathe {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-6px) scale(1.01); }
+}
+
+@keyframes wheel-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.4)); }
+  50%      { opacity: 1;   filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.8)); }
+}
+
+/* ───────── Utility classes ───────── */
+.animate-zero-g-drift   { animation: zero-g-drift   6s ease-in-out infinite; }
+.animate-idle-float     { animation: idle-float     4.5s ease-in-out infinite; }
+.animate-zero-g-shadow  { animation: zero-g-shadow  6s ease-in-out infinite; }
+.animate-silk-breathe   { animation: silk-breathe   5s ease-in-out infinite; }
+.animate-wheel-spin     { animation: wheel-spin     1s linear infinite; }
+.animate-pulse-glow     { animation: pulse-glow     2s ease-in-out infinite; }
+
+/* ───────── Hide Next.js Dev Indicator Badge in Bottom-Left ───────── */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-portal],
+#nextjs-dev-overlay,
+#__next-build-watcher {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ───────── Bike Park / Pixel Arcade Font Definitions ───────── */
+@font-face {
+  font-family: 'Bike Park';
+  src: local('Bike Park'),
+       local('BikePark'),
+       local('Bike Park Regular'),
+       local('BikePark-Regular'),
+       url('/fonts/PixelifySans.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: local('Press Start 2P'),
+       url('/fonts/PressStart2P.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-bikepark {
+  font-family: 'Bike Park', 'BikePark', 'Pixelify Sans', 'Press Start 2P', monospace, sans-serif;
+  letter-spacing: 0.12em;
+}
+
+/* ───────── 3D Chromatic Pixel Mission Titles (Matching User Mockups) ───────── */
+/* Mars: Vibrant Electric Cyan face with Magenta & Deep Violet 3D bevels */
+.mission-title-mars {
+  color: #00F0FF;
+  text-shadow:
+    0 -2px 0 #FF007F,
+    0 -4px 0 #FF007F,
+    1px -3px 0 #D946EF,
+    2px -2px 0 #9333EA,
+    3px 0px 0 #7E22CE,
+    3px 3px 0 #4C1D95,
+    4px 4px 0 #1E1B4B,
+    0 0 25px rgba(0, 240, 255, 0.65),
+    0 0 45px rgba(234, 88, 12, 0.4);
+}
+
+/* ISS: Golden Amber / Orange face with Hot Magenta & Cyan 3D bevels */
+.mission-title-iss {
+  color: #FFAE00;
+  text-shadow:
+    0 -2px 0 #FF0099,
+    0 -4px 0 #FF0099,
+    1px -3px 0 #D946EF,
+    2px -2px 0 #00E5FF,
+    3px 0px 0 #0284C7,
+    3px 3px 0 #1E1B4B,
+    4px 4px 0 #0F172A,
+    0 0 25px rgba(255, 174, 0, 0.65),
+    0 0 45px rgba(6, 182, 212, 0.4);
+}
+
+/* Moon: Holographic Lunar Pearl face with Electric Violet & Cyan 3D bevels */
+.mission-title-moon {
+  color: #F8FAFC;
+  text-shadow:
+    0 -2px 0 #EC4899,
+    0 -4px 0 #D946EF,
+    1px -3px 0 #A855F7,
+    2px -2px 0 #06B6D4,
+    3px 0px 0 #0284C7,
+    3px 3px 0 #312E81,
+    4px 4px 0 #000000,
+    0 0 25px rgba(255, 255, 255, 0.75),
+    0 0 45px rgba(168, 85, 247, 0.35);
 }
