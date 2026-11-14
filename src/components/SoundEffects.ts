@@ -1,4 +1,4 @@
-// Hollow Knight & Silksong inspired atmospheric sound generator using Web Audio API
+// 16-Bit Retro Pixel Arcade Web Audio Sound FX Synthesizer
 class SoundManager {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
@@ -17,7 +17,7 @@ class SoundManager {
     }
   }
 
-  // Soft silk thread pluck / needle tap
+  // Retro 8-bit/16-bit arcade square/triangle blip
   playBlip(freq = 432, type: OscillatorType = "sine", duration = 0.12) {
     if (!this.enabled || typeof window === "undefined") return;
     try {
@@ -44,25 +44,28 @@ class SoundManager {
     }
   }
 
-  // Mechanical switch / drill step click
+  // Mechanical tactile microswitch arcade click
   playClick(freq = 520) {
     this.playBlip(freq, "triangle", 0.08);
   }
 
-  // Silksong bell / silk spool tension chime for advancing steps
+  // Subtle futuristic HUD hover tone
+  playHover(freq = 780) {
+    this.playBlip(freq, "sine", 0.04);
+  }
+
+  // Retro arcade power-up / step advance chime
   playNextStep() {
     if (!this.enabled) return;
-    // Two-tone bell harmonic (Pharloom bell chord)
     this.playBlip(576, "triangle", 0.18);
     setTimeout(() => {
       this.playBlip(864, "sine", 0.28);
     }, 70);
   }
 
-  // Dramatic Silksong needle slash & sacred chord for launching / mode select
+  // Dramatic 16-bit arcade mission launch chord
   playLaunchChord() {
     if (!this.enabled) return;
-    // Ancient chord: D - F# - A - D (Ethereal Silk Chord)
     const freqs = [293.66, 369.99, 440.0, 587.33];
     freqs.forEach((freq, idx) => {
       setTimeout(() => {
@@ -71,7 +74,7 @@ class SoundManager {
     });
   }
 
-  // Pulsing danger/crisis alarm
+  // Pulsing retro arcade alarm
   playAlarm() {
     if (!this.enabled) return;
     this.playBlip(680, "sawtooth", 0.12);
@@ -80,10 +83,10 @@ class SoundManager {
     }, 130);
   }
 
-  // Triumphant earth splashdown / mission success chord
+  // Triumphant 16-bit arcade mission success fanfare
   playSuccessChord() {
     if (!this.enabled) return;
-    const freqs = [349.23, 440.0, 523.25, 698.46, 880.0]; // F major radiant chord
+    const freqs = [349.23, 440.0, 523.25, 698.46, 880.0];
     freqs.forEach((freq, idx) => {
       setTimeout(() => {
         this.playBlip(freq, "sine", 0.45);

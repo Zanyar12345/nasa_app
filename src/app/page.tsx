@@ -3,17 +3,17 @@
 import React, { useState } from "react";
 import LandingScreen from "@/components/LandingScreen";
 import DestinationSelector, { DestinationId } from "@/components/DestinationSelector";
-import WelcomeGuide from "@/components/WelcomeGuide";
+import IssMission from "@/components/IssMission";
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<"landing" | "destination" | "guide">("landing");
+  const [currentView, setCurrentView] = useState<"landing" | "destination" | "mission">("landing");
   const [lang, setLang] = useState<"tr" | "en">("tr");
   const [soundOn, setSoundOn] = useState<boolean>(true);
   const [playerName, setPlayerName] = useState<string>("Commander");
-  const [missionMode, setMissionMode] = useState<"solo" | "coop" | null>(null);
-  const [, setSelectedDestination] = useState<DestinationId>("moon");
+  const [, setMissionMode] = useState<"solo" | "coop" | null>(null);
+  const [, setSelectedDestination] = useState<DestinationId>("mars");
 
-  // When player clicks [ SINGLE PLAYER ], transition to the Destination Gallery!
+  // When player clicks [ SINGLE PLAYER ], transition smoothly to the Destination Gallery!
   const handleStartSolo = (name: string) => {
     setPlayerName(name);
     setMissionMode("solo");
@@ -29,16 +29,17 @@ export default function Home() {
 
   const handleSelectDestination = (destId: DestinationId) => {
     setSelectedDestination(destId);
-    setCurrentView("guide");
-  };
-
-  const handleReturnToLanding = () => {
-    setCurrentView("landing");
-    setMissionMode(null);
+    if (destId === "iss") {
+      setCurrentView("mission");
+    }
   };
 
   const handleBackToLandingFromDest = () => {
     setCurrentView("landing");
+  };
+
+  const handleBackFromMission = () => {
+    setCurrentView("destination");
   };
 
   const handleToggleSound = () => {
@@ -58,26 +59,26 @@ export default function Home() {
     );
   }
 
-  if (currentView === "destination") {
+  if (currentView === "mission") {
     return (
-      <DestinationSelector
+      <IssMission
         playerName={playerName}
         lang={lang}
         soundOn={soundOn}
         onToggleSound={handleToggleSound}
-        onBack={handleBackToLandingFromDest}
-        onSelectDestination={handleSelectDestination}
+        onAbort={handleBackFromMission}
       />
     );
   }
 
   return (
-    <WelcomeGuide
-      onReturnToLanding={handleReturnToLanding}
-      initialLang={lang}
-      initialSoundOn={soundOn}
+    <DestinationSelector
       playerName={playerName}
-      initialMode={missionMode}
+      lang={lang}
+      soundOn={soundOn}
+      onToggleSound={handleToggleSound}
+      onBack={handleBackToLandingFromDest}
+      onSelectDestination={handleSelectDestination}
     />
   );
 }

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Rocket,
   ArrowLeft,
   Compass,
   Telescope,
@@ -79,32 +78,32 @@ export const DESTINATIONS: DestinationItem[] = [
     orbitTypeTr: "Gezegenler Arası Yörünge",
     orbitTypeEn: "Interplanetary Orbit",
     theme: {
-      cardBg: "bg-[#1f0c08]/85",
-      cardBorder: "border-orange-500/40",
-      cardGlow: "shadow-[0_20px_50px_rgba(234,88,12,0.25)] ring-1 ring-orange-500/20",
+      cardBg: "bg-[#140603]/95",
+      cardBorder: "border-2 border-orange-500",
+      cardGlow: "shadow-[6px_6px_0px_#000] ring-1 ring-orange-500/40",
       arrowBtn:
-        "bg-[#1f0c08]/80 hover:bg-[#33140d]/90 border-orange-500/40 hover:border-orange-400 text-orange-200 hover:text-white shadow-2xl shadow-orange-950/60",
-      arrowIcon: "text-orange-300 group-hover:text-orange-100",
-      indicatorBadge: "bg-[#1f0c08]/85 border-orange-500/40 text-orange-100 shadow-orange-950/50",
-      indicatorDotActive: "bg-orange-500 shadow-sm shadow-orange-500/80",
-      headerChip: "bg-[#1f0c08]/80 border-orange-500/30 text-orange-300",
+        "bg-[#140603]/90 hover:bg-[#280c07] border-2 border-orange-500 hover:border-orange-400 text-orange-200 hover:text-white shadow-[4px_4px_0px_#000] arcade-btn",
+      arrowIcon: "text-orange-400 group-hover:text-white",
+      indicatorBadge: "bg-[#140603]/90 border-2 border-orange-500 text-orange-100 shadow-[3px_3px_0px_#000] font-press-start text-[10px]",
+      indicatorDotActive: "bg-orange-500 shadow-[0_0_8px_#f97316]",
+      headerChip: "bg-[#140603]/90 border-2 border-orange-500/80 text-orange-300 shadow-[3px_3px_0px_#000] font-silkscreen",
       headerBackBtn:
-        "bg-[#1f0c08]/80 hover:bg-[#33140d] border-orange-500/40 text-orange-200 hover:text-white shadow-orange-950/40",
+        "bg-[#140603]/90 hover:bg-[#280c07] border-2 border-orange-500 text-orange-200 hover:text-white shadow-[3px_3px_0px_#000] font-silkscreen arcade-btn",
       headerIcon: "text-orange-400",
-      chipBg: "bg-orange-950/60 border-orange-500/30 text-orange-200",
+      chipBg: "bg-[#240b07] border border-orange-500/50 text-orange-200 shadow-[2px_2px_0px_#000] font-silkscreen",
       accentText: "text-orange-400",
       tagPulse: "bg-orange-500",
-      tagText: "text-orange-300",
-      divider: "border-orange-900/50",
+      tagText: "text-orange-300 font-press-start text-[9px]",
+      divider: "border-orange-900/80",
       primaryBtn:
-        "bg-gradient-to-r from-orange-600 via-red-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-[0_12px_35px_rgba(234,88,12,0.55)] hover:shadow-[0_16px_45px_rgba(249,115,22,0.7)] border-orange-400/40",
-      primaryBtnIcon: "text-amber-200",
-      primaryBtnArrow: "text-orange-200",
+        "bg-orange-600 hover:bg-orange-500 border-2 border-amber-300 text-white shadow-[5px_5px_0px_#000] font-press-start arcade-btn",
+      primaryBtnIcon: "text-amber-300",
+      primaryBtnArrow: "text-white",
       infoBtn:
-        "bg-[#1f0c08]/85 hover:bg-[#33140d] border-orange-500/50 hover:border-orange-400 text-orange-300 hover:text-white shadow-[0_0_25px_rgba(234,88,12,0.35)] ring-1 ring-orange-500/20",
+        "bg-[#140603]/90 hover:bg-[#280c07] border-2 border-orange-500 text-orange-300 shadow-[4px_4px_0px_#000] font-press-start arcade-btn",
       infoBtnActive:
-        "bg-orange-600 border-orange-400 text-white shadow-[0_0_35px_rgba(234,88,12,0.7)] ring-2 ring-orange-300",
-      infoIcon: "text-orange-300 group-hover:text-orange-100",
+        "bg-orange-600 border-2 border-white text-white shadow-[4px_4px_0px_#000] font-press-start",
+      infoIcon: "text-orange-300 group-hover:text-white",
       titleColor: "text-amber-100",
       titleGlow:
         "drop-shadow-[0_0_35px_rgba(249,115,22,0.85)] drop-shadow-[0_4px_18px_rgba(0,0,0,0.95)]",
@@ -125,32 +124,32 @@ export const DESTINATIONS: DestinationItem[] = [
     orbitTypeTr: "Dairesel Alçak Yörünge (LEO)",
     orbitTypeEn: "Circular Low Earth Orbit",
     theme: {
-      cardBg: "bg-[#081524]/85",
-      cardBorder: "border-cyan-400/40",
-      cardGlow: "shadow-[0_20px_50px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/20",
+      cardBg: "bg-[#030e1c]/95",
+      cardBorder: "border-2 border-cyan-400",
+      cardGlow: "shadow-[6px_6px_0px_#000] ring-1 ring-cyan-400/40",
       arrowBtn:
-        "bg-[#081524]/80 hover:bg-[#0c223a]/90 border-cyan-400/40 hover:border-cyan-300 text-cyan-200 hover:text-white shadow-2xl shadow-cyan-950/60",
-      arrowIcon: "text-cyan-300 group-hover:text-cyan-100",
-      indicatorBadge: "bg-[#081524]/85 border-cyan-400/40 text-cyan-100 shadow-cyan-950/50",
-      indicatorDotActive: "bg-cyan-400 shadow-sm shadow-cyan-400/80",
-      headerChip: "bg-[#081524]/80 border-cyan-400/30 text-cyan-300",
+        "bg-[#030e1c]/90 hover:bg-[#081e38] border-2 border-cyan-400 hover:border-cyan-300 text-cyan-200 hover:text-white shadow-[4px_4px_0px_#000] arcade-btn",
+      arrowIcon: "text-cyan-300 group-hover:text-white",
+      indicatorBadge: "bg-[#030e1c]/90 border-2 border-cyan-400 text-cyan-100 shadow-[3px_3px_0px_#000] font-press-start text-[10px]",
+      indicatorDotActive: "bg-cyan-400 shadow-[0_0_8px_#22d3ee]",
+      headerChip: "bg-[#030e1c]/90 border-2 border-cyan-400/80 text-cyan-300 shadow-[3px_3px_0px_#000] font-silkscreen",
       headerBackBtn:
-        "bg-[#081524]/80 hover:bg-[#0c223a] border-cyan-400/40 text-cyan-200 hover:text-white shadow-cyan-950/40",
+        "bg-[#030e1c]/90 hover:bg-[#081e38] border-2 border-cyan-400 text-cyan-200 hover:text-white shadow-[3px_3px_0px_#000] font-silkscreen arcade-btn",
       headerIcon: "text-cyan-400",
-      chipBg: "bg-cyan-950/60 border-cyan-400/30 text-cyan-200",
+      chipBg: "bg-[#07182c] border border-cyan-400/50 text-cyan-200 shadow-[2px_2px_0px_#000] font-silkscreen",
       accentText: "text-cyan-400",
       tagPulse: "bg-cyan-400",
-      tagText: "text-cyan-300",
-      divider: "border-cyan-900/50",
+      tagText: "text-cyan-300 font-press-start text-[9px]",
+      divider: "border-cyan-950",
       primaryBtn:
-        "bg-gradient-to-r from-cyan-600 via-blue-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white shadow-[0_12px_35px_rgba(8,145,178,0.55)] hover:shadow-[0_16px_45px_rgba(6,182,212,0.7)] border-cyan-300/40",
-      primaryBtnIcon: "text-sky-200",
-      primaryBtnArrow: "text-cyan-200",
+        "bg-cyan-600 hover:bg-cyan-500 border-2 border-cyan-200 text-white shadow-[5px_5px_0px_#000] font-press-start arcade-btn",
+      primaryBtnIcon: "text-cyan-200",
+      primaryBtnArrow: "text-white",
       infoBtn:
-        "bg-[#081524]/85 hover:bg-[#0c223a] border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white shadow-[0_0_25px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400/20",
+        "bg-[#030e1c]/90 hover:bg-[#081e38] border-2 border-cyan-400 text-cyan-300 shadow-[4px_4px_0px_#000] font-press-start arcade-btn",
       infoBtnActive:
-        "bg-cyan-600 border-cyan-300 text-white shadow-[0_0_35px_rgba(6,182,212,0.7)] ring-2 ring-cyan-200",
-      infoIcon: "text-cyan-300 group-hover:text-cyan-100",
+        "bg-cyan-600 border-2 border-white text-white shadow-[4px_4px_0px_#000] font-press-start",
+      infoIcon: "text-cyan-300 group-hover:text-white",
       titleColor: "text-cyan-100",
       titleGlow:
         "drop-shadow-[0_0_35px_rgba(6,182,212,0.85)] drop-shadow-[0_4px_18px_rgba(0,0,0,0.95)]",
@@ -171,31 +170,31 @@ export const DESTINATIONS: DestinationItem[] = [
     orbitTypeTr: "Ay Yörüngesi & Asteroit Randevusu",
     orbitTypeEn: "Lunar Orbit & Asteroid Rendezvous",
     theme: {
-      cardBg: "bg-[#12141a]/90",
-      cardBorder: "border-slate-300/40",
-      cardGlow: "shadow-[0_20px_50px_rgba(203,213,225,0.2)] ring-1 ring-white/20",
+      cardBg: "bg-[#0c0d12]/95",
+      cardBorder: "border-2 border-slate-300",
+      cardGlow: "shadow-[6px_6px_0px_#000] ring-1 ring-white/40",
       arrowBtn:
-        "bg-[#12141a]/85 hover:bg-[#1e222d]/90 border-slate-300/40 hover:border-white text-slate-200 hover:text-white shadow-2xl shadow-black/60",
+        "bg-[#0c0d12]/90 hover:bg-[#1a1b24] border-2 border-slate-300 hover:border-white text-slate-200 hover:text-white shadow-[4px_4px_0px_#000] arcade-btn",
       arrowIcon: "text-slate-300 group-hover:text-white",
-      indicatorBadge: "bg-[#12141a]/85 border-slate-300/40 text-white shadow-black/50",
-      indicatorDotActive: "bg-white shadow-sm shadow-white/80",
-      headerChip: "bg-[#12141a]/85 border-slate-400/30 text-slate-200",
+      indicatorBadge: "bg-[#0c0d12]/90 border-2 border-slate-300 text-white shadow-[3px_3px_0px_#000] font-press-start text-[10px]",
+      indicatorDotActive: "bg-white shadow-[0_0_8px_#ffffff]",
+      headerChip: "bg-[#0c0d12]/90 border-2 border-slate-400/80 text-slate-200 shadow-[3px_3px_0px_#000] font-silkscreen",
       headerBackBtn:
-        "bg-[#12141a]/85 hover:bg-[#1e222d] border-slate-300/40 text-slate-200 hover:text-white shadow-black/40",
+        "bg-[#0c0d12]/90 hover:bg-[#1a1b24] border-2 border-slate-300 text-slate-200 hover:text-white shadow-[3px_3px_0px_#000] font-silkscreen arcade-btn",
       headerIcon: "text-slate-300",
-      chipBg: "bg-slate-900/80 border-slate-600/40 text-slate-200",
+      chipBg: "bg-[#171822] border border-slate-500/50 text-slate-200 shadow-[2px_2px_0px_#000] font-silkscreen",
       accentText: "text-slate-200",
       tagPulse: "bg-slate-300",
-      tagText: "text-slate-300",
+      tagText: "text-slate-300 font-press-start text-[9px]",
       divider: "border-slate-800",
       primaryBtn:
-        "bg-slate-200 hover:bg-white text-slate-950 font-black shadow-[0_12px_35px_rgba(255,255,255,0.35)] hover:shadow-[0_16px_45px_rgba(255,255,255,0.55)] border-white/60",
-      primaryBtnIcon: "text-slate-900",
-      primaryBtnArrow: "text-slate-900",
+        "bg-slate-200 hover:bg-white border-2 border-white text-slate-950 shadow-[5px_5px_0px_#000] font-press-start arcade-btn",
+      primaryBtnIcon: "text-slate-950",
+      primaryBtnArrow: "text-slate-950",
       infoBtn:
-        "bg-[#12141a]/85 hover:bg-[#1e222d] border-slate-300/50 hover:border-white text-slate-200 hover:text-white shadow-[0_0_25px_rgba(203,213,225,0.25)] ring-1 ring-white/20",
+        "bg-[#0c0d12]/90 hover:bg-[#1a1b24] border-2 border-slate-300 text-slate-200 shadow-[4px_4px_0px_#000] font-press-start arcade-btn",
       infoBtnActive:
-        "bg-slate-200 border-white text-slate-950 shadow-[0_0_35px_rgba(255,255,255,0.6)] ring-2 ring-white",
+        "bg-slate-200 border-2 border-white text-slate-950 shadow-[4px_4px_0px_#000] font-press-start",
       infoIcon: "text-slate-300 group-hover:text-white",
       titleColor: "text-slate-100",
       titleGlow:
@@ -310,6 +309,9 @@ export default function DestinationSelector({
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 via-black/15 to-transparent z-15 pointer-events-none" />
       </div>
 
+      {/* CRT Scanline Retro Arcade Monitor Overlay */}
+      <div className="fixed inset-0 crt-overlay z-40 pointer-events-none" />
+
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 2. TOP FLOATING NAVIGATION & BACK / HUD CONTROLS             */}
       {/* ───────────────────────────────────────────────────────────── */}
@@ -318,17 +320,17 @@ export default function DestinationSelector({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border backdrop-blur-md text-xs font-mono font-bold transition-all duration-500 cursor-pointer active:scale-95 ${t.headerBackBtn}`}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-none sm:rounded-sm border-2 backdrop-blur-md text-xs font-silkscreen font-bold transition-all duration-300 cursor-pointer shadow-[3px_3px_0px_#000] arcade-btn ${t.headerBackBtn}`}
             title={lang === "tr" ? "Geri Dön" : "Back"}
           >
-            <ArrowLeft className={`w-4 h-4 transition-colors duration-500 ${t.headerIcon}`} />
+            <ArrowLeft className={`w-4 h-4 transition-colors duration-300 ${t.headerIcon}`} />
             <span>{lang === "tr" ? "GERİ" : "BACK"}</span>
           </button>
 
           <div
-            className={`hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl border backdrop-blur-md text-xs font-mono shadow-md transition-all duration-500 ${t.headerChip}`}
+            className={`hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-none sm:rounded-sm border-2 backdrop-blur-md text-xs font-silkscreen shadow-[3px_3px_0px_#000] transition-all duration-300 ${t.headerChip}`}
           >
-            <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${t.tagPulse}`} />
+            <span className={`w-2 h-2 rounded-none animate-pulse ${t.tagPulse}`} />
             <span className="font-bold uppercase tracking-wider">
               {playerName ? `CMDR: ${playerName}` : "CMDR: NOVA"}
             </span>
@@ -336,7 +338,7 @@ export default function DestinationSelector({
         </div>
 
         {/* Center: Slide Dot Indicators in Top Header */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/60 border border-white/10 backdrop-blur-md shadow-md">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-none sm:rounded-sm bg-black/80 border-2 border-slate-700 shadow-[3px_3px_0px_#000]">
           {DESTINATIONS.map((dest, idx) => (
             <button
               key={dest.id}
@@ -344,10 +346,10 @@ export default function DestinationSelector({
                 sounds.playClick(680);
                 setCurrentIndex(idx);
               }}
-              className={`transition-all duration-500 rounded-full cursor-pointer ${
+              className={`transition-all duration-300 cursor-pointer ${
                 idx === currentIndex
-                  ? `w-6 h-1.5 ${t.indicatorDotActive}`
-                  : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
+                  ? `w-6 h-2 ${t.indicatorDotActive} rounded-none`
+                  : "w-2 h-2 bg-white/40 hover:bg-white/80 rounded-none"
               }`}
               title={dest.name}
             />
@@ -357,15 +359,15 @@ export default function DestinationSelector({
         {/* Right: Sound & Telescope Info */}
         <div className="flex items-center gap-2.5">
           <div
-            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border backdrop-blur-md text-[11px] font-mono transition-all duration-500 ${t.headerChip}`}
+            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-none sm:rounded-sm border-2 backdrop-blur-md text-[11px] font-silkscreen transition-all duration-300 shadow-[3px_3px_0px_#000] ${t.headerChip}`}
           >
-            <Telescope className={`w-3.5 h-3.5 transition-colors duration-500 ${t.headerIcon}`} />
+            <Telescope className={`w-3.5 h-3.5 transition-colors duration-300 ${t.headerIcon}`} />
             <span>NASA ARCHIVE</span>
           </div>
 
           <button
             onClick={onToggleSound}
-            className={`p-2 rounded-xl border text-xs backdrop-blur-md shadow-md transition-all duration-500 cursor-pointer active:scale-95 ${t.headerBackBtn}`}
+            className={`p-2 rounded-none sm:rounded-sm border-2 text-xs backdrop-blur-md shadow-[3px_3px_0px_#000] transition-all duration-300 cursor-pointer arcade-btn ${t.headerBackBtn}`}
             title={soundOn ? "Sesi Kapat / Mute" : "Sesi Aç / Unmute"}
           >
             {soundOn ? (
@@ -397,59 +399,59 @@ export default function DestinationSelector({
       {/* Left Arrow Button (<) */}
       <button
         onClick={handlePrev}
-        className={`fixed left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-14 sm:h-14 rounded-full border backdrop-blur-md transition-all duration-500 cursor-pointer flex items-center justify-center group ${t.arrowBtn}`}
+        className={`fixed left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-14 sm:h-14 rounded-none sm:rounded-sm border-2 backdrop-blur-md transition-all duration-300 cursor-pointer flex items-center justify-center group shadow-[4px_4px_0px_#000] arcade-btn ${t.arrowBtn}`}
         aria-label="Önceki / Previous Slide"
         title="Önceki Hedef (Sol Yön Tuşu / Left Arrow)"
       >
         <ChevronLeft
-          className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-500 group-hover:-translate-x-0.5 ${t.arrowIcon}`}
+          className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:-translate-x-0.5 ${t.arrowIcon}`}
         />
       </button>
 
       {/* Right Arrow Button (>) */}
       <button
         onClick={handleNext}
-        className={`fixed right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-14 sm:h-14 rounded-full border backdrop-blur-md transition-all duration-500 cursor-pointer flex items-center justify-center group ${t.arrowBtn}`}
+        className={`fixed right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-14 sm:h-14 rounded-none sm:rounded-sm border-2 backdrop-blur-md transition-all duration-300 cursor-pointer flex items-center justify-center group shadow-[4px_4px_0px_#000] arcade-btn ${t.arrowBtn}`}
         aria-label="Sonraki / Next Slide"
         title="Sonraki Hedef (Sağ Yön Tuşu / Right Arrow)"
       >
         <ChevronRight
-          className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-500 group-hover:translate-x-0.5 ${t.arrowIcon}`}
+          className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:translate-x-0.5 ${t.arrowIcon}`}
         />
       </button>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 4. SLEEK CIRCULAR '?' INFO BUTTON & HOVER/CLICK NASA CARD     */}
+      {/* 4. SLEEK RETRO ARCADE '?' INFO BUTTON & HOVER/CLICK NASA CARD */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div
-        className="fixed bottom-8 left-16 sm:left-20 z-30"
+        className="fixed bottom-2 sm:bottom-2.5 left-16 sm:left-20 z-30"
         onMouseEnter={() => setIsInfoHovered(true)}
         onMouseLeave={() => setIsInfoHovered(false)}
       >
         {/* Revealed Themed NASA Scientific Info Card (smoothly revealed on hover or pinned by click) */}
         <div
-          className={`absolute bottom-full left-0 pb-3 transition-all duration-500 origin-bottom-left ${
+          className={`absolute bottom-full left-0 pb-3 transition-all duration-300 origin-bottom-left ${
             isInfoOpen
               ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
               : "opacity-0 scale-95 translate-y-3 pointer-events-none"
           }`}
         >
           <div
-            className={`max-w-[calc(100vw-88px)] sm:max-w-xl w-[calc(100vw-88px)] sm:w-[500px] rounded-3xl p-5 sm:p-6 backdrop-blur-xl border space-y-3.5 transition-all duration-500 shadow-2xl ${t.cardBg} ${t.cardBorder} ${t.cardGlow}`}
+            className={`max-w-[calc(100vw-88px)] sm:max-w-xl w-[calc(100vw-88px)] sm:w-[500px] rounded-none sm:rounded-sm p-5 sm:p-6 backdrop-blur-xl border-2 space-y-3.5 transition-all duration-300 shadow-[8px_8px_0px_#000] ${t.cardBg} ${t.cardBorder} ${t.cardGlow}`}
           >
             {/* Destination Category Badge & Name */}
             <div className={`flex items-center justify-between gap-2 border-b pb-2.5 ${t.divider}`}>
               <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${t.tagPulse}`} />
-                <span className={`text-[11px] font-mono font-bold tracking-widest uppercase ${t.tagText}`}>
+                <span className={`w-2 h-2 rounded-none animate-pulse ${t.tagPulse}`} />
+                <span className={`text-[10px] font-press-start tracking-wider uppercase ${t.tagText}`}>
                   {lang === "tr" ? activeDest.badgeTr : activeDest.badgeEn}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
                 {isInfoPinned && (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/20">
-                    {lang === "tr" ? "SABİTLENDİ" : "PINNED"}
+                  <span className="text-[9px] font-press-start px-2 py-0.5 rounded-none bg-white/10 text-white border border-white/30">
+                    {lang === "tr" ? "PINNED" : "PINNED"}
                   </span>
                 )}
                 <button
@@ -460,7 +462,7 @@ export default function DestinationSelector({
                     setIsInfoPinned(false);
                     setIsInfoHovered(false);
                   }}
-                  className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10 cursor-pointer"
+                  className="text-slate-400 hover:text-white transition-colors p-1 hover:bg-white/10 cursor-pointer"
                   title={lang === "tr" ? "Kapat" : "Close"}
                   aria-label={lang === "tr" ? "Kapat" : "Close"}
                 >
@@ -470,35 +472,35 @@ export default function DestinationSelector({
             </div>
 
             {/* Title */}
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-press-start tracking-tight text-white flex items-center gap-2">
               <span>{lang === "tr" ? activeDest.nameTr : `${activeDest.name} MISSION`}</span>
             </h2>
 
-            {/* Exact Official NASA Description */}
-            <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed max-h-36 sm:max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700">
+            {/* Exact Official NASA Description in Crisp Pixel Font */}
+            <p className="text-base sm:text-lg font-vt323 text-slate-200 leading-snug max-h-40 sm:max-h-52 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700 tracking-wide">
               {activeDest.description}
             </p>
 
             {/* Telemetry Chips */}
-            <div className={`flex flex-wrap items-center gap-2 pt-1 border-t text-[11px] font-mono ${t.divider}`}>
-              <div className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-all duration-500 ${t.chipBg}`}>
-                <Orbit className={`w-3.5 h-3.5 transition-colors duration-500 ${t.accentText}`} />
+            <div className={`flex flex-wrap items-center gap-2 pt-1 border-t text-[11px] font-silkscreen ${t.divider}`}>
+              <div className={`px-2.5 py-1 rounded-none border shadow-[2px_2px_0px_#000] flex items-center gap-1.5 transition-all duration-300 ${t.chipBg}`}>
+                <Orbit className={`w-3.5 h-3.5 transition-colors duration-300 ${t.accentText}`} />
                 <span>{lang === "tr" ? activeDest.distanceTr : activeDest.distanceEn}</span>
               </div>
 
-              <div className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-all duration-500 ${t.chipBg}`}>
-                <Compass className={`w-3.5 h-3.5 transition-colors duration-500 ${t.accentText}`} />
+              <div className={`px-2.5 py-1 rounded-none border shadow-[2px_2px_0px_#000] flex items-center gap-1.5 transition-all duration-300 ${t.chipBg}`}>
+                <Compass className={`w-3.5 h-3.5 transition-colors duration-300 ${t.accentText}`} />
                 <span>{lang === "tr" ? activeDest.orbitTypeTr : activeDest.orbitTypeEn}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sleek, circular ? (Question Mark) icon button */}
+        {/* Sharp Retro Arcade ? (Question Mark) icon button */}
         <button
           type="button"
           onClick={handleTogglePin}
-          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border backdrop-blur-md transition-all duration-500 cursor-pointer flex items-center justify-center group active:scale-95 shadow-2xl ${
+          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-none sm:rounded-sm border-2 backdrop-blur-md transition-all duration-300 cursor-pointer flex items-center justify-center group shadow-[4px_4px_0px_#000] arcade-btn ${
             isInfoPinned ? t.infoBtnActive : t.infoBtn
           }`}
           aria-label={lang === "tr" ? "NASA Bilgi Kartı (?)" : "NASA Mission Information (?)"}
@@ -513,7 +515,7 @@ export default function DestinationSelector({
           }
         >
           <QuestionMark
-            className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-500 group-hover:scale-110 ${
+            className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-300 group-hover:scale-110 ${
               isInfoPinned ? "text-inherit" : t.infoIcon
             }`}
             strokeWidth={2.4}
@@ -523,9 +525,9 @@ export default function DestinationSelector({
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 5. DYNAMIC SCI-FI HUD SELECT DESTINATION / LAUNCH BUTTON      */}
+      {/* 5. DYNAMIC SCI-FI HUD SELECT MISSION / LAUNCH BUTTON          */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="fixed bottom-6 right-4 sm:right-10 z-30">
+      <div className="fixed bottom-14 sm:bottom-16 right-4 sm:right-10 z-30">
         <SciFiHudButton
           onClick={handleSelect}
           theme={activeDest.id === "mars" ? "orange" : activeDest.id === "iss" ? "cyan" : "silver"}
@@ -533,13 +535,11 @@ export default function DestinationSelector({
           systemStatus="SYSTEM: ACTIVE"
           size="lg"
         >
-          <Rocket className="w-5 h-5 shrink-0" />
           <span>
             {lang === "tr"
-              ? "HEDEFİ SEÇ / BAŞLA"
-              : "SELECT DESTINATION"}
+              ? "GÖREVİ SEÇ / BAŞLA"
+              : "SELECT MISSION"}
           </span>
-          <ChevronRight className="w-5 h-5 shrink-0" />
         </SciFiHudButton>
       </div>
     </main>

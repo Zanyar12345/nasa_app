@@ -1,111 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700;900&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Share+Tech+Mono&family=Pixelify+Sans:wght@600;700;900&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  --background: #050814;
+  --foreground: #F8FAFC;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Silkscreen', 'Press Start 2P', system-ui, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* ───────── Crisp Daylight Blueprint Background Grid ───────── */
-.bg-blueprint-grid {
-  background-color: #F8FAFC;
-  background-image: 
-    linear-gradient(to right, rgba(37, 99, 235, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-/* ───────── Clean Daylight Blueprint Cards ───────── */
-.nasa-card, .hk-frame, .silksong-frame {
-  background: #FFFFFF;
-  border: 1.5px solid #CBD5E1;
-  box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
-}
-
-.nasa-subcard, .silksong-subcard {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.03);
-}
-
-/* ───────── Subtle Floating / Breathing Animations ───────── */
-@keyframes zero-g-drift {
-  0%   { transform: translateY(0px)   rotate(0deg); }
-  25%  { transform: translateY(-5px)  rotate(0.2deg); }
-  50%  { transform: translateY(-10px) rotate(-0.2deg); }
-  75%  { transform: translateY(-4px)  rotate(0.1deg); }
-  100% { transform: translateY(0px)   rotate(0deg); }
-}
-
-@keyframes idle-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes zero-g-shadow {
-  0%, 100% { transform: scale(1);    opacity: 0.15; }
-  50%       { transform: scale(0.85); opacity: 0.07; }
-}
-
-@keyframes silk-breathe {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50%       { transform: translateY(-6px) scale(1.01); }
-}
-
-@keyframes wheel-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.4)); }
-  50%      { opacity: 1;   filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.8)); }
-}
-
-/* ───────── Utility classes ───────── */
-.animate-zero-g-drift   { animation: zero-g-drift   6s ease-in-out infinite; }
-.animate-idle-float     { animation: idle-float     4.5s ease-in-out infinite; }
-.animate-zero-g-shadow  { animation: zero-g-shadow  6s ease-in-out infinite; }
-.animate-silk-breathe   { animation: silk-breathe   5s ease-in-out infinite; }
-.animate-wheel-spin     { animation: wheel-spin     1s linear infinite; }
-.animate-pulse-glow     { animation: pulse-glow     2s ease-in-out infinite; }
-
-/* ───────── Hide Next.js Dev Indicator Badge in Bottom-Left ───────── */
-nextjs-portal,
-[data-nextjs-toast],
-[data-nextjs-portal],
-#nextjs-dev-overlay,
-#__next-build-watcher {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* ───────── Bike Park / Pixel Arcade Font Definitions ───────── */
-@font-face {
-  font-family: 'Bike Park';
-  src: local('Bike Park'),
-       local('BikePark'),
-       local('Bike Park Regular'),
-       local('BikePark-Regular'),
-       url('/fonts/PixelifySans.ttf') format('truetype');
-  font-weight: 400 900;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* ───────── Pixel Arcade Typography (@font-face with local assets) ───────── */
 @font-face {
   font-family: 'Press Start 2P';
   src: local('Press Start 2P'),
@@ -115,13 +24,178 @@ nextjs-portal,
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'VT323';
+  src: local('VT323'),
+       local('VT323-Regular'),
+       url('/fonts/VT323.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Silkscreen';
+  src: local('Silkscreen'),
+       local('Silkscreen-Regular'),
+       url('/fonts/Silkscreen.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: local('Pixelify Sans'),
+       url('/fonts/PixelifySans.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bike Park';
+  src: local('Bike Park'),
+       local('BikePark'),
+       url('/fonts/PixelifySans.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ───────── Typography Utilities ───────── */
+.font-press-start {
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: -0.04em;
+}
+
+.font-vt323 {
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.05em;
+}
+
+.font-silkscreen {
+  font-family: 'Silkscreen', monospace;
+}
+
+.font-pixel {
+  font-family: 'Press Start 2P', 'Silkscreen', monospace;
+}
+
+.font-pixel-body {
+  font-family: 'VT323', monospace;
+  font-size: 1.18rem;
+  line-height: 1.35;
+}
+
 .font-bikepark {
   font-family: 'Bike Park', 'BikePark', 'Pixelify Sans', 'Press Start 2P', monospace, sans-serif;
+  letter-spacing: 0.14em;
+}
+
+/* ───────── Sci-Fi HUD Typography ───────── */
+.font-hud {
+  font-family: 'Orbitron', 'Rajdhani', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.14em;
+}
+
+.font-hud-mono {
+  font-family: 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   letter-spacing: 0.12em;
 }
 
-/* ───────── 3D Chromatic Pixel Mission Titles (Matching User Mockups) ───────── */
-/* Mars: Vibrant Electric Cyan face with Magenta & Deep Violet 3D bevels */
+/* ───────── Crisp Pixelated Image Rendering ───────── */
+.pixelated,
+img.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* ───────── Retro CRT Scanlines Overlay ───────── */
+.crt-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.3) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.02),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.02)
+  );
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+/* ───────── Retro Hazard Caution Stripes ───────── */
+.bg-hazard-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    #eab308,
+    #eab308 6px,
+    #020617 6px,
+    #020617 12px
+  );
+}
+
+/* ───────── Tactile Arcade Button Press States ───────── */
+.arcade-btn {
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.arcade-btn:active {
+  transform: translate(3px, 3px) !important;
+  box-shadow: 0px 0px 0px transparent !important;
+}
+
+/* ───────── Retro Pixel HUD Frame Classes ───────── */
+.retro-pixel-card {
+  background: rgba(10, 15, 26, 0.94);
+  border: 2px solid #00F0FF;
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.retro-pixel-subcard {
+  background: rgba(5, 8, 18, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* ───────── Floating / Breathing Animations ───────── */
+@keyframes zero-g-drift {
+  0%   { transform: translateY(0px)   rotate(0deg); }
+  25%  { transform: translateY(-4px)  rotate(0.2deg); }
+  50%  { transform: translateY(-8px)  rotate(-0.2deg); }
+  75%  { transform: translateY(-3px)  rotate(0.1deg); }
+  100% { transform: translateY(0px)   rotate(0deg); }
+}
+
+@keyframes idle-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.4)); }
+  50%      { opacity: 1;   filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.8)); }
+}
+
+.animate-zero-g-drift   { animation: zero-g-drift   6s ease-in-out infinite; }
+.animate-idle-float     { animation: idle-float     4s ease-in-out infinite; }
+.animate-pulse-glow     { animation: pulse-glow     2s ease-in-out infinite; }
+
+/* ───────── 3D Chromatic Pixel Mission Titles ───────── */
 .mission-title-mars {
   color: #00F0FF;
   text-shadow:
@@ -136,7 +210,6 @@ nextjs-portal,
     0 0 45px rgba(234, 88, 12, 0.4);
 }
 
-/* ISS: Golden Amber / Orange face with Hot Magenta & Cyan 3D bevels */
 .mission-title-iss {
   color: #FFAE00;
   text-shadow:
@@ -151,7 +224,6 @@ nextjs-portal,
     0 0 45px rgba(6, 182, 212, 0.4);
 }
 
-/* Moon: Holographic Lunar Pearl face with Electric Violet & Cyan 3D bevels */
 .mission-title-moon {
   color: #F8FAFC;
   text-shadow:
@@ -164,4 +236,15 @@ nextjs-portal,
     4px 4px 0 #000000,
     0 0 25px rgba(255, 255, 255, 0.75),
     0 0 45px rgba(168, 85, 247, 0.35);
+}
+
+/* ───────── Hide Next.js Dev Indicator Badge in Bottom-Left ───────── */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-portal],
+#nextjs-dev-overlay,
+#__next-build-watcher {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

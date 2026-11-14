@@ -1,10 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NASA Space Apps 2026 — Lunar Survival & Asteroid ISRU Rover",
+  title: "NASA Space Apps 2026 — 16-Bit Retro Space Mission Arcade",
   description:
-    "An interactive space mission design lab, modular rover builder, and asteroid ISRU survival simulator for the 2026 NASA Space Apps Challenge.",
+    "An interactive 16-bit retro pixel-arcade space destination gallery and exploration terminal for the 2026 NASA Space Apps Challenge.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#050814",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -13,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" className="h-full bg-[#F8FAFC]">
-      <body className="min-h-full flex flex-col antialiased bg-[#F8FAFC] text-[#0F172A] selection:bg-[#2563EB] selection:text-white">
+    <html lang="tr" className="h-full bg-[#050814]">
+      <body className="min-h-full flex flex-col antialiased bg-[#050814] text-[#F8FAFC] selection:bg-[#06B6D4] selection:text-black">
         {children}
       </body>
     </html>

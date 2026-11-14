@@ -102,27 +102,27 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
       {/* Modal Dialog Card */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900/95 text-slate-100 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-y-auto backdrop-blur-xl ring-1 ring-white/10 space-y-6"
+        className="relative w-full max-w-2xl max-h-[90vh] bg-slate-950/98 text-slate-100 border-2 border-cyan-400 rounded-none sm:rounded-sm p-6 sm:p-8 shadow-[10px_10px_0px_#000] overflow-y-auto backdrop-blur-xl space-y-6"
       >
         {/* Top Header Bar */}
-        <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between gap-4 border-b-2 border-slate-800 pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-widest bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase flex items-center gap-1.5">
+              <span className="px-2.5 py-1 rounded-none text-[9px] font-press-start bg-blue-500/20 text-blue-400 border border-blue-500/40 uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_#000]">
                 <Telescope className="w-3 h-3 text-blue-400" />
                 NASA / WEBB ARCHIVE
               </span>
               <span className="text-slate-500 text-xs">•</span>
-              <span className="text-xs font-mono text-slate-400">{NASA_PHOTO_INFO.catalogId}</span>
+              <span className="text-xs font-silkscreen text-slate-400">{NASA_PHOTO_INFO.catalogId}</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-press-start text-white tracking-tight pt-1">
               {NASA_PHOTO_INFO.title}
             </h2>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-none bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white transition-colors cursor-pointer shadow-[3px_3px_0px_#000] arcade-btn"
             aria-label="Kapat / Close"
           >
             <X className="w-5 h-5" />
@@ -131,18 +131,18 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
 
         {/* Scientific Description */}
         <div className="space-y-2">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <h3 className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Info className="w-3.5 h-3.5 text-sky-400" />
             <span>{lang === "tr" ? "Bilimsel Açıklama" : "Scientific Overview"}</span>
           </h3>
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-base sm:text-lg font-vt323 text-slate-300 leading-relaxed tracking-wide">
             {lang === "tr" ? NASA_PHOTO_INFO.descriptionTr : NASA_PHOTO_INFO.descriptionEn}
           </p>
         </div>
 
         {/* Multi-Wavelength Composite Breakdown */}
         <div className="space-y-2.5">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <h3 className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>
               {lang === "tr" ? "Dalga Boyu & Gözlemevi Renk Rehberi" : "Multi-Wavelength Telescope Color Map"}
@@ -152,15 +152,15 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
             {NASA_PHOTO_INFO.wavelengthGuide.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex flex-col justify-between space-y-1.5"
+                className="p-3 rounded-none bg-slate-900/80 border border-slate-700 flex flex-col justify-between space-y-1.5 shadow-[2px_2px_0px_#000]"
               >
                 <div className="flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded-full ${item.color} shadow-sm shrink-0`} />
-                  <span className="text-xs font-bold text-white leading-tight">
+                  <span className={`w-2.5 h-2.5 rounded-none ${item.color} shadow-sm shrink-0`} />
+                  <span className="text-[11px] font-silkscreen font-bold text-white leading-tight">
                     {lang === "tr" ? item.instrumentTr : item.instrumentEn}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-snug">
+                <p className="text-sm font-vt323 text-slate-400 leading-snug">
                   {lang === "tr" ? item.detailsTr : item.detailsEn}
                 </p>
               </div>
@@ -170,7 +170,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
 
         {/* Telemetry / Object Details Table */}
         <div className="space-y-2">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <h3 className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Orbit className="w-3.5 h-3.5 text-indigo-400" />
             <span>{lang === "tr" ? "Gözlem Verileri" : "Observation Telemetry"}</span>
           </h3>
@@ -178,12 +178,12 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
             {NASA_PHOTO_INFO.details.map((detail, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-700/40 text-left"
+                className="p-2.5 rounded-none bg-slate-900/80 border border-slate-700 text-left shadow-[2px_2px_0px_#000]"
               >
-                <span className="text-[10px] font-mono text-slate-400 uppercase block">
+                <span className="text-[10px] font-silkscreen text-slate-400 uppercase block">
                   {lang === "tr" ? detail.labelTr : detail.labelEn}
                 </span>
-                <span className="text-xs font-bold text-slate-200 block truncate">
+                <span className="text-xs font-silkscreen font-bold text-slate-200 block truncate">
                   {detail.value}
                 </span>
               </div>
@@ -192,22 +192,22 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
         </div>
 
         {/* Telescopes & Credit */}
-        <div className="p-3.5 rounded-2xl bg-blue-950/30 border border-blue-800/40 text-xs text-slate-300 space-y-1">
-          <div className="flex items-center gap-2 text-blue-400 font-bold font-mono">
+        <div className="p-3.5 rounded-none bg-blue-950/40 border-2 border-blue-800/60 text-xs text-slate-300 space-y-1 shadow-[3px_3px_0px_#000]">
+          <div className="flex items-center gap-2 text-blue-400 font-bold font-silkscreen">
             <Radio className="w-3.5 h-3.5" />
             <span>{lang === "tr" ? "Gözlemevleri & Telif" : "Observatories & Credits"}</span>
           </div>
-          <p className="text-[11px] text-slate-300">
+          <p className="text-xs font-silkscreen text-slate-300">
             {NASA_PHOTO_INFO.telescopes.join(" • ")}
           </p>
-          <p className="text-[10px] font-mono text-slate-400">
+          <p className="text-[10px] font-silkscreen text-slate-400">
             Credit: {NASA_PHOTO_INFO.credit}
           </p>
         </div>
 
         {/* Action Button: Official NASA Flickr Source Link */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
-          <span className="text-[11px] font-mono text-slate-400 text-center sm:text-left">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t-2 border-slate-800 font-silkscreen">
+          <span className="text-[10px] text-slate-400 text-center sm:text-left">
             {lang === "tr"
               ? "NASA James Webb Resmi Flickr Arşivine yönlendirilir"
               : "Direct link to official NASA JWST Flickr Archive"}
@@ -217,7 +217,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
             href={NASA_PHOTO_INFO.flickrUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-none bg-blue-600 hover:bg-blue-500 border-2 border-blue-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000] transition-all cursor-pointer arcade-btn"
           >
             <span>{lang === "tr" ? "Resmi NASA Kaynağını Görüntüle" : "View Official NASA Source"}</span>
             <ExternalLink className="w-3.5 h-3.5" />
