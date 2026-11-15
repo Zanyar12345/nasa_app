@@ -37,7 +37,7 @@ export default function LandingScreen({
   const [panelView, setPanelView] = useState<"title" | "setup" | "multiplayer">("title");
   const [playerName, setPlayerName] = useState<string>("");
   const [nameError, setNameError] = useState<string>("");
-  const [roomCode, setRoomCode] = useState<string>("NASA-2026");
+  const [roomCode] = useState<string>("NASA-2026");
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [joinCodeInput, setJoinCodeInput] = useState<string>("");
   const [multiplayerTab, setMultiplayerTab] = useState<"create" | "join">("create");
@@ -97,14 +97,8 @@ export default function LandingScreen({
 
   const handleSelectMultiplayer = () => {
     const trimmed = playerName.trim();
-    if (trimmed.length < 2) {
-      sounds.playAlarm();
-      setNameError("Please enter a callsign with at least 2 characters.");
-      return;
-    }
     sounds.playBlip(680);
-    setRoomCode(`NASA-${Math.floor(1000 + Math.random() * 9000)}`);
-    setPanelView("multiplayer");
+    onStartCoop(trimmed.length >= 2 ? trimmed : "NOVA-01");
   };
 
   const handleLaunchCoop = () => {
@@ -347,14 +341,14 @@ export default function LandingScreen({
               {/* 2. Prominent Mode Selection Buttons with Expanded Safe Spacing & Zero Collision */}
               <div className="pt-2">
                 <div className="flex flex-col gap-7 sm:gap-8">
-                  {/* Mode Button 1: SINGLE PLAYER */}
+                  {/* Mode Button 1: 1P SOLO */}
                   <div className="w-full">
                     <SciFiHudButton
                       onClick={handleSelectSolo}
                       disabled={!isNameValid}
                       theme="cyan"
                       code="SOLO_01"
-                      systemStatus="MODE: SINGLE PLAYER"
+                      systemStatus="MODE: 1P SOLO"
                       size="md"
                       className="w-full py-2"
                       showTelemetryBlock={false}
@@ -362,7 +356,7 @@ export default function LandingScreen({
                     >
                       <div className="flex items-center gap-2.5">
                         <User className="w-4 h-4 text-cyan-300 shrink-0" />
-                        <span>SINGLE PLAYER</span>
+                        <span>[ 1P SOLO ]</span>
                       </div>
                     </SciFiHudButton>
                   </div>
@@ -371,7 +365,6 @@ export default function LandingScreen({
                   <div className="w-full">
                     <SciFiHudButton
                       onClick={handleSelectMultiplayer}
-                      disabled={!isNameValid}
                       theme="cyan"
                       code="COOP_02"
                       systemStatus="MODE: MULTIPLAYER"
@@ -382,7 +375,7 @@ export default function LandingScreen({
                     >
                       <div className="flex items-center gap-2.5">
                         <Users className="w-4 h-4 text-cyan-300 shrink-0" />
-                        <span>MULTIPLAYER</span>
+                        <span>[ MULTIPLAYER ]</span>
                       </div>
                     </SciFiHudButton>
                   </div>

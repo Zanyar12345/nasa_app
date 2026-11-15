@@ -14,6 +14,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+import { PlayerProgressPhase } from "@/lib/multiplayerSync";
+
 export interface MarsMissionProps {
   playerName: string;
   soundOn: boolean;
@@ -21,6 +23,8 @@ export interface MarsMissionProps {
   onAbort: () => void;
   /** Optional callback hook for plugging in the playable Mars surface mini-game after Stage 7 */
   onStartMarsGame?: () => void;
+  onPhaseProgress?: (phase: PlayerProgressPhase, strategyLabel?: string) => void;
+  onMissionComplete?: (baseScore1000: number, strategyLabel: string) => void;
 }
 
 export type MarsStageId =
@@ -521,6 +525,8 @@ export default function MarsMission({
   soundOn,
   onToggleSound,
   onAbort,
+  onPhaseProgress,
+  onMissionComplete,
 }: MarsMissionProps) {
   const [phase, setPhase] = useState<MarsMissionPhase>("BRIEFING_INTRO");
   const [briefingPage, setBriefingPage] = useState<number>(0);
@@ -1077,6 +1083,39 @@ export default function MarsMission({
     transitionToPhase,
     onAbort,
   ]);
+
+  const standardizedScore1000 = Math.min(
+    1000,
+    Math.max(
+      100,
+      Math.round(
+        520 +
+          Math.max(1, sampledSites.length) * 140 +
+          Math.max(0, 60 - plannedMoves.length * 4)
+      )
+    )
+  );
+
+  useEffect(() => {
+    if (!onPhaseProgress) return;
+    const progressLabel: PlayerProgressPhase =
+      phase === "BRIEFING_INTRO" || phase === "PHASE_A_SOLUTIONS"
+        ? "IN PHASE A"
+        : phase === "PHASE_BC_ROVER"
+          ? "IN PHASE B/C"
+          : phase === "SAMPLING_SITE_MAP" || phase === "SAMPLING_SITE_VIEW"
+            ? "IN PHASE E"
+            : phase === "PHASE_F_VICTORY"
+              ? "FINISHED ✓"
+              : "IN PHASE D";
+    onPhaseProgress(progressLabel, chosenRoverDef.shortName);
+  }, [phase, onPhaseProgress, chosenRoverDef.shortName]);
+
+  useEffect(() => {
+    if (phase === "PHASE_F_VICTORY" && onMissionComplete) {
+      onMissionComplete(standardizedScore1000, chosenRoverDef.shortName);
+    }
+  }, [phase, onMissionComplete, standardizedScore1000, chosenRoverDef.shortName]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-stone-950 text-stone-100 select-none flex flex-col font-sans">
@@ -2522,6 +2561,10 @@ export default function MarsMission({
                   <p className="font-pixel-body text-emerald-100 text-[11px] sm:text-xs leading-relaxed">
                     {`${chosenRoverDef.cardName} successfully navigated the delayed-command telemetry grid and extracted pristine Martian core samples from Jezero Crater (${sampledSites.length} / 3 sites sampled).`}
                   </p>
+
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-900 border border-amber-400/70 font-press-start text-[8px] sm:text-[9px] text-amber-300">
+                    <span>{`BASE SCORE: ${standardizedScore1000} / 1000 PTS`}</span>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-emerald-500/30">

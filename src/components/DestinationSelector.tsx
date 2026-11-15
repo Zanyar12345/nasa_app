@@ -12,6 +12,7 @@ import {
   Orbit,
   QuestionMark,
   X,
+  Users,
 } from "lucide-react";
 import { sounds } from "./SoundEffects";
 import SciFiHudButton from "./SciFiHudButton";
@@ -194,6 +195,7 @@ interface DestinationSelectorProps {
   onToggleSound: () => void;
   onBack: () => void;
   onSelectDestination: (destId: DestinationId) => void;
+  onOpenMultiplayer?: () => void;
 }
 
 export default function DestinationSelector({
@@ -202,6 +204,7 @@ export default function DestinationSelector({
   onToggleSound,
   onBack,
   onSelectDestination,
+  onOpenMultiplayer,
 }: DestinationSelectorProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isInfoPinned, setIsInfoPinned] = useState<boolean>(false);
@@ -348,10 +351,29 @@ export default function DestinationSelector({
           ))}
         </div>
 
-        {/* Right: Sound & Telescope Info */}
+        {/* Right: 1P Solo / Multiplayer Mode Switcher, Sound & Telescope Info */}
         <div className="flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 border-2 border-emerald-400/70 text-emerald-300 font-press-start text-[9px] shadow-[3px_3px_0px_#000]">
+            <span>[ 1P SOLO ]</span>
+          </div>
+
+          {onOpenMultiplayer && (
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playBlip(720);
+                onOpenMultiplayer();
+              }}
+              className="px-3 py-1.5 bg-cyan-950/90 hover:bg-cyan-900 border-2 border-cyan-400 text-cyan-200 hover:text-white font-press-start text-[9px] flex items-center gap-1.5 shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+              title="Open Real-Time Multiplayer Room Lobby"
+            >
+              <Users className="w-3.5 h-3.5 text-cyan-300" />
+              <span>[ MULTIPLAYER ]</span>
+            </button>
+          )}
+
           <div
-            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-none sm:rounded-sm border-2 backdrop-blur-md text-[11px] font-silkscreen transition-all duration-300 shadow-[3px_3px_0px_#000] ${t.headerChip}`}
+            className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-none sm:rounded-sm border-2 backdrop-blur-md text-[11px] font-silkscreen transition-all duration-300 shadow-[3px_3px_0px_#000] ${t.headerChip}`}
           >
             <Telescope className={`w-3.5 h-3.5 transition-colors duration-300 ${t.headerIcon}`} />
             <span>NASA ARCHIVE</span>

@@ -24,11 +24,15 @@ import {
   Zap,
 } from "lucide-react";
 
+import { PlayerProgressPhase } from "@/lib/multiplayerSync";
+
 export interface IssMissionProps {
   playerName: string;
   soundOn: boolean;
   onToggleSound: () => void;
   onAbort: () => void;
+  onPhaseProgress?: (phase: PlayerProgressPhase, strategyLabel?: string) => void;
+  onMissionComplete?: (baseScore1000: number, strategyLabel: string) => void;
 }
 
 export type IssMissionPhase =
@@ -690,6 +694,8 @@ export default function IssMission({
   soundOn,
   onToggleSound,
   onAbort,
+  onPhaseProgress,
+  onMissionComplete,
 }: IssMissionProps) {
   const [phase, setPhase] = useState<IssMissionPhase>("PHASE_A_BRIEFING");
   const [briefingPage, setBriefingPage] = useState<number>(0);
@@ -1733,7 +1739,41 @@ export default function IssMission({
     return () => cancelAnimationFrame(animId);
   }, [phase, panelOverlayOpen, isPanelFullyRepaired, transitionToPhase]);
 
-  const finalRank = score >= 3600 ? "S" : score >= 2600 ? "A" : "B";
+  const standardizedScore1000 = Math.min(
+    1000,
+    Math.max(
+      100,
+      Math.round(
+        400 +
+          sparesCollected * 80 +
+          suitIntegrity * 60 +
+          Math.min(180, Math.round(evaOxygenLeft * 1.7))
+      )
+    )
+  );
+  const finalRank =
+    standardizedScore1000 >= 900 ? "S" : standardizedScore1000 >= 750 ? "A" : "B";
+
+  useEffect(() => {
+    if (!onPhaseProgress) return;
+    const progressLabel: PlayerProgressPhase =
+      phase === "PHASE_A_BRIEFING"
+        ? "IN PHASE A"
+        : phase === "PHASE_BC_CARGO"
+          ? "IN PHASE B/C"
+          : phase === "PHASE_E_EVA"
+            ? "IN PHASE E"
+            : phase === "PHASE_F_VICTORY"
+              ? "FINISHED ✓"
+              : "IN PHASE D";
+    onPhaseProgress(progressLabel, "4x4 DRAGON ORU + EVA");
+  }, [phase, onPhaseProgress]);
+
+  useEffect(() => {
+    if (phase === "PHASE_F_VICTORY" && onMissionComplete) {
+      onMissionComplete(standardizedScore1000, "4x4 DRAGON ORU + EVA");
+    }
+  }, [phase, onMissionComplete, standardizedScore1000]);
 
   const lifecycleTag =
     phase === "PHASE_A_BRIEFING"
@@ -3050,8 +3090,8 @@ export default function IssMission({
                     <strong className="text-emerald-300">100% ONLINE</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
-                    <span className="text-slate-400 block text-[10px]">SCORE</span>
-                    <strong className="text-amber-300">{score} PTS</strong>
+                    <span className="text-slate-400 block text-[10px]">BASE SCORE</span>
+                    <strong className="text-amber-300">{standardizedScore1000} / 1000</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-emerald-400/60">
                     <span className="text-slate-400 block text-[10px]">NASA RANK</span>

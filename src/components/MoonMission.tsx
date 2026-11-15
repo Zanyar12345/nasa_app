@@ -15,11 +15,15 @@ import {
   Package,
 } from "lucide-react";
 
+import { PlayerProgressPhase } from "@/lib/multiplayerSync";
+
 export interface MoonMissionProps {
   playerName: string;
   soundOn: boolean;
   onToggleSound: () => void;
   onAbort: () => void;
+  onPhaseProgress?: (phase: PlayerProgressPhase, strategyLabel?: string) => void;
+  onMissionComplete?: (baseScore1000: number, strategyLabel: string) => void;
 }
 
 export type MoonMissionPhase =
@@ -768,6 +772,8 @@ export default function MoonMission({
   soundOn,
   onToggleSound,
   onAbort,
+  onPhaseProgress,
+  onMissionComplete,
 }: MoonMissionProps) {
   const [phase, setPhase] = useState<MoonMissionPhase>("PHASE_A_BRIEFING");
   const [briefingPage, setBriefingPage] = useState<number>(0);
@@ -1287,13 +1293,39 @@ export default function MoonMission({
     onAbort,
   ]);
 
-  const finalRank = score >= 3600 ? "S" : score >= 2600 ? "A" : "B";
-
   const activeSolutionSlide =
     LUNAR_POWER_SOLUTIONS[solutionSlideIndex] || LUNAR_POWER_SOLUTIONS[0];
   const chosenSolutionDef =
     LUNAR_POWER_SOLUTIONS.find((s) => s.id === selectedPowerSolution) ||
     LUNAR_POWER_SOLUTIONS[0];
+
+  const standardizedScore1000 = Math.min(
+    1000,
+    Math.max(100, Math.round((score / 4100) * 1000))
+  );
+  const finalRank =
+    standardizedScore1000 >= 900 ? "S" : standardizedScore1000 >= 750 ? "A" : "B";
+
+  useEffect(() => {
+    if (!onPhaseProgress) return;
+    const progressLabel: PlayerProgressPhase =
+      phase === "PHASE_A_BRIEFING" || phase === "PHASE_A_SOLUTIONS"
+        ? "IN PHASE A"
+        : phase === "PHASE_BC_CARGO"
+          ? "IN PHASE B/C"
+          : phase === "PHASE_E_EXPEDITION"
+            ? "IN PHASE E"
+            : phase === "PHASE_F_VICTORY"
+              ? "FINISHED ✓"
+              : "IN PHASE D";
+    onPhaseProgress(progressLabel, chosenSolutionDef.shortName);
+  }, [phase, onPhaseProgress, chosenSolutionDef.shortName]);
+
+  useEffect(() => {
+    if (phase === "PHASE_F_VICTORY" && onMissionComplete) {
+      onMissionComplete(standardizedScore1000, chosenSolutionDef.shortName);
+    }
+  }, [phase, onMissionComplete, standardizedScore1000, chosenSolutionDef.shortName]);
 
   const lifecycleTag =
     phase === "PHASE_A_BRIEFING"
@@ -2566,8 +2598,8 @@ export default function MoonMission({
                     <strong className="text-white">4 / 4 ONLINE</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
-                    <span className="text-slate-400 block text-[10px]">SCORE</span>
-                    <strong className="text-amber-300">{score} PTS</strong>
+                    <span className="text-slate-400 block text-[10px]">BASE SCORE</span>
+                    <strong className="text-amber-300">{standardizedScore1000} / 1000</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-emerald-400/60">
                     <span className="text-slate-400 block text-[10px]">NASA RANK</span>
