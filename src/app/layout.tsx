@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NASA Space Apps 2026 — 16-Bit Retro Space Mission Arcade",
+  title: "Astro Specialist — NASA Space Apps 2026",
   description:
     "An interactive 16-bit retro pixel-arcade space destination gallery and exploration terminal for the 2026 NASA Space Apps Challenge.",
 };

@@ -231,7 +231,7 @@ export default function LandingScreen({
               <div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-wider text-white leading-tight font-press-start drop-shadow-[4px_4px_0px_#000]">
                   <span className="block text-sky-400">ASTRO</span>
-                  <span className="block text-amber-300">ARCADE</span>
+                  <span className="block text-amber-300">SPECIALIST</span>
                 </h1>
               </div>
 
