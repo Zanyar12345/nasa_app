@@ -10,12 +10,8 @@ import {
   CheckCircle2,
   Play,
   Pause,
-  Shield,
-  Heart,
-  Compass,
   Award,
   AlertTriangle,
-  Radio,
   Package,
 } from "lucide-react";
 
@@ -295,33 +291,195 @@ function FairingPartPixelIcon({
   }
 }
 
-interface LunarSampleNode {
-  id: number;
-  type: "ICE_CRYSTAL" | "HE3_CORE";
-  label: string;
-  x: number;
-  y: number;
-  collected: boolean;
+interface LunarGridCell {
+  col: number; // 0..7 (8 columns left to right)
+  row: number; // 0..3 (4 rows top to bottom)
 }
 
-interface LunarHazard {
-  id: number;
-  type: "CRATER" | "BOULDER";
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  vx: number;
+type LunarDirection = "W" | "A" | "S" | "D";
+
+interface LunarAssemblyMapConfig {
+  stageIndex: number; // 0..3
+  compCode: string; // "comp-1" .. "comp-4"
+  compBadge: string; // "COMP-1" .. "COMP-4"
+  title: string;
+  gridImage: string;
+  startCell: LunarGridCell;
+  compCell: LunarGridCell;
+  stationCell: LunarGridCell;
+  nuclearPartId: string;
+  solarPartId: string;
 }
 
-interface ThrusterParticle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-  color: string;
+const LUNAR_GRID_COLS = 8;
+const LUNAR_GRID_ROWS = 4;
+
+const LUNAR_ASSEMBLY_MAPS: LunarAssemblyMapConfig[] = [
+  {
+    stageIndex: 0,
+    compCode: "comp-1",
+    compBadge: "COMP-1",
+    title: "STAGE 1/4 // PRIMARY POWER SOURCE PICKUP & DELIVERY",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.34.26 (1).jpg",
+    startCell: { col: 0, row: 3 },
+    compCell: { col: 3, row: 2 },
+    stationCell: { col: 6, row: 1 },
+    nuclearPartId: "u235_core",
+    solarPartId: "pv_arrays",
+  },
+  {
+    stageIndex: 1,
+    compCode: "comp-2",
+    compBadge: "COMP-2",
+    title: "STAGE 2/4 // ENERGY CONVERSION & STORAGE DELIVERY",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.34.26.jpg",
+    startCell: { col: 0, row: 3 },
+    compCell: { col: 4, row: 0 },
+    stationCell: { col: 6, row: 1 },
+    nuclearPartId: "stirling_converters",
+    solarPartId: "battery_bank",
+  },
+  {
+    stageIndex: 2,
+    compCode: "comp-3",
+    compBadge: "COMP-3",
+    title: "STAGE 3/4 // THERMAL / POWER REGULATION MODULE DELIVERY",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.34.27.jpg",
+    startCell: { col: 7, row: 0 },
+    compCell: { col: 0, row: 2 },
+    stationCell: { col: 2, row: 0 },
+    nuclearPartId: "radiator_panels",
+    solarPartId: "pmu_controller",
+  },
+  {
+    stageIndex: 3,
+    compCode: "comp-4",
+    compBadge: "COMP-4",
+    title: "STAGE 4/4 // SHIELDING & TRACKING GIMBAL FINAL ASSEMBLY",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.34.27 (1).jpg",
+    startCell: { col: 7, row: 0 },
+    compCell: { col: 4, row: 3 },
+    stationCell: { col: 1, row: 0 },
+    nuclearPartId: "radiation_shield",
+    solarPartId: "tracking_gimbals",
+  },
+];
+
+function LunarRoverPixelSprite({
+  carryingPartId,
+  className = "w-14 h-14",
+}: {
+  carryingPartId?: string | null;
+  className?: string;
+}) {
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg
+        viewBox="0 0 36 28"
+        className={className}
+        style={{ shapeRendering: "crispEdges" }}
+      >
+        {/* High-Gain Dish Antenna */}
+        <rect x="6" y="2" width="6" height="2" fill="#38bdf8" />
+        <rect x="8" y="4" width="2" height="6" fill="#94a3b8" />
+        <rect x="5" y="1" width="2" height="2" fill="#e0f2fe" />
+        {/* Camera Mast & Dual Warm Headlights */}
+        <rect x="24" y="3" width="4" height="3" fill="#f8fafc" />
+        <rect x="27" y="4" width="2" height="2" fill="#22d3ee" />
+        <rect x="25" y="6" width="2" height="4" fill="#cbd5e1" />
+        {/* Gold-Foil Thermal Blanket Chassis */}
+        <rect x="6" y="10" width="24" height="7" fill="#eab308" />
+        <rect x="8" y="11" width="20" height="5" fill="#facc15" />
+        <rect x="10" y="12" width="14" height="3" fill="#fef08a" />
+        {/* Front LED Headlight Beams */}
+        <rect x="30" y="11" width="3" height="2" fill="#fef08a" />
+        <rect x="30" y="14" width="3" height="2" fill="#38bdf8" />
+        {/* Rocker-Bogie Suspension Struts */}
+        <rect x="8" y="17" width="20" height="2" fill="#64748b" />
+        {/* 6 Lunar Mesh Wheels */}
+        <rect x="5" y="19" width="6" height="6" fill="#0f172a" />
+        <rect x="6" y="20" width="4" height="4" fill="#38bdf8" />
+        <rect x="15" y="19" width="6" height="6" fill="#0f172a" />
+        <rect x="16" y="20" width="4" height="4" fill="#38bdf8" />
+        <rect x="25" y="19" width="6" height="6" fill="#0f172a" />
+        <rect x="26" y="20" width="4" height="4" fill="#38bdf8" />
+      </svg>
+      {carryingPartId && (
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 p-0.5 bg-emerald-950/95 border border-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.95)]">
+          <FairingPartPixelIcon partId={carryingPartId} className="w-4 h-4" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LunarStationPixelSprite({
+  installedCount,
+  isDocking,
+  className = "w-14 h-14",
+}: {
+  installedCount: number;
+  isDocking?: boolean;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 36 32"
+      className={className}
+      style={{ shapeRendering: "crispEdges" }}
+    >
+      {/* Comms Tower & Beacon */}
+      <rect x="17" y="1" width="2" height="7" fill="#94a3b8" />
+      <rect
+        x="16"
+        y="0"
+        width="4"
+        height="3"
+        fill={isDocking ? "#4ade80" : "#22d3ee"}
+      />
+      {/* Pressurized Lunar Habitat Dome */}
+      <rect x="10" y="8" width="16" height="3" fill="#e2e8f0" />
+      <rect x="7" y="11" width="22" height="9" fill="#cbd5e1" />
+      {/* Dome Armored Viewport Windows */}
+      <rect x="10" y="13" width="4" height="4" fill="#38bdf8" />
+      <rect x="16" y="13" width="4" height="4" fill="#38bdf8" />
+      <rect x="22" y="13" width="4" height="4" fill="#38bdf8" />
+      {/* Gold Thermal Trim & Airlock */}
+      <rect x="5" y="20" width="26" height="3" fill="#eab308" />
+      <rect x="15" y="18" width="6" height="5" fill="#0f172a" />
+      {/* Glowing Power Node Indicators (4 Nodes for 4 Components) */}
+      <rect
+        x="7"
+        y="24"
+        width="4"
+        height="3"
+        fill={installedCount >= 1 ? "#4ade80" : "#334155"}
+      />
+      <rect
+        x="13"
+        y="24"
+        width="4"
+        height="3"
+        fill={installedCount >= 2 ? "#4ade80" : "#334155"}
+      />
+      <rect
+        x="19"
+        y="24"
+        width="4"
+        height="3"
+        fill={installedCount >= 3 ? "#4ade80" : "#334155"}
+      />
+      <rect
+        x="25"
+        y="24"
+        width="4"
+        height="3"
+        fill={installedCount >= 4 ? "#4ade80" : "#334155"}
+      />
+      {/* Docking Pad Base */}
+      <rect x="3" y="27" width="30" height="3" fill="#22d3ee" />
+    </svg>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -636,44 +794,16 @@ export default function MoonMission({
   const [fairingError, setFairingError] = useState<string | null>(null);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // PHASE E: 2D LUNAR SURFACE ROVER & 1/6G SAMPLE EXPEDITION STATE
+  // PHASE E: 4-STAGE SEQUENTIAL LUNAR ROVER COMPONENT ASSEMBLY GAME (8x4 GRID)
   // ─────────────────────────────────────────────────────────────────────────
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [expeditionTimeLeft, setExpeditionTimeLeft] = useState<number>(95);
-  const [hullShields, setHullShields] = useState<number>(3);
-  const [iceCollected, setIceCollected] = useState<number>(0);
-  const [he3Collected, setHe3Collected] = useState<number>(0);
-  const [nearBeacon, setNearBeacon] = useState<boolean>(false);
-  const [seismometerDeployed, setSeismometerDeployed] = useState<boolean>(false);
-  const [failureReason, setFailureReason] = useState<string>("");
-
-  const keysRef = useRef<{ left: boolean; right: boolean; jump: boolean }>({
-    left: false,
-    right: false,
-    jump: false,
-  });
-
-  const roverRef = useRef<{
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    onGround: boolean;
-    facing: 1 | -1;
-    invulnFrames: number;
-  }>({
-    x: 110,
-    y: 340,
-    vx: 0,
-    vy: 0,
-    onGround: true,
-    facing: 1,
-    invulnFrames: 0,
-  });
-
-  const samplesRef = useRef<LunarSampleNode[]>([]);
-  const hazardsRef = useRef<LunarHazard[]>([]);
-  const particlesRef = useRef<ThrusterParticle[]>([]);
+  const [assemblyStageIndex, setAssemblyStageIndex] = useState<number>(0);
+  const [plannedMoves, setPlannedMoves] = useState<LunarDirection[]>([]);
+  const [roverExecStatus, setRoverExecStatus] = useState<
+    "PLANNING" | "DRIVING" | "INSTALLING" | "STAGE_COMPLETE"
+  >("PLANNING");
+  const [roverStepIndex, setRoverStepIndex] = useState<number>(0);
+  const [assemblyHint, setAssemblyHint] = useState<string | null>(null);
+  const [failureReason] = useState<string>("");
 
   const lastBlipRef = useRef<number>(0);
 
@@ -694,43 +824,13 @@ export default function MoonMission({
 
   const isTypewriterDone = typewriterIndex >= activeText.length;
 
-  // Initialize Phase E 2D Lunar Expedition entities
+  // Initialize Phase E 4-Stage Lunar Rover Component Assembly Game
   const initLunarExpedition = useCallback(() => {
-    roverRef.current = {
-      x: 90,
-      y: 340,
-      vx: 0,
-      vy: 0,
-      onGround: true,
-      facing: 1,
-      invulnFrames: 0,
-    };
-    setExpeditionTimeLeft(95);
-    setHullShields(3);
-    setIceCollected(0);
-    setHe3Collected(0);
-    setNearBeacon(false);
-    setSeismometerDeployed(false);
-
-    samplesRef.current = [
-      { id: 1, type: "ICE_CRYSTAL", label: "H2O ICE #1", x: 380, y: 310, collected: false },
-      { id: 2, type: "HE3_CORE", label: "HE-3 CORE #1", x: 670, y: 245, collected: false },
-      { id: 3, type: "ICE_CRYSTAL", label: "H2O ICE #2", x: 990, y: 295, collected: false },
-      { id: 4, type: "HE3_CORE", label: "HE-3 CORE #2", x: 1320, y: 225, collected: false },
-      { id: 5, type: "ICE_CRYSTAL", label: "H2O ICE #3", x: 1650, y: 295, collected: false },
-      { id: 6, type: "HE3_CORE", label: "HE-3 CORE #3", x: 1960, y: 240, collected: false },
-    ];
-
-    hazardsRef.current = [
-      { id: 1, type: "CRATER", x: 470, y: 382, w: 95, h: 28, vx: 0 },
-      { id: 2, type: "CRATER", x: 1090, y: 382, w: 110, h: 28, vx: 0 },
-      { id: 3, type: "CRATER", x: 1730, y: 382, w: 105, h: 28, vx: 0 },
-      { id: 4, type: "BOULDER", x: 840, y: 354, w: 28, h: 28, vx: -1.35 },
-      { id: 5, type: "BOULDER", x: 1490, y: 354, w: 28, h: 28, vx: -1.6 },
-      { id: 6, type: "BOULDER", x: 2060, y: 354, w: 28, h: 28, vx: -1.4 },
-    ];
-
-    particlesRef.current = [];
+    setAssemblyStageIndex(0);
+    setPlannedMoves([]);
+    setRoverExecStatus("PLANNING");
+    setRoverStepIndex(0);
+    setAssemblyHint(null);
   }, []);
 
   // Helper to cleanly transition between phases and reset stage progress
@@ -816,9 +916,9 @@ export default function MoonMission({
     }
   }, [phase, transitionToPhase]);
 
-  // Animated 0% -> 100% loading bar for Stages 1 through 6
+  // Animated 0% -> 100% loading bar for Stages 1 through 7
   useEffect(() => {
-    if (!currentStage || phase === "STAGE_7") return;
+    if (!currentStage) return;
 
     const interval = setInterval(() => {
       setLoadProgress((prev) => {
@@ -834,7 +934,6 @@ export default function MoonMission({
   useEffect(() => {
     if (
       !currentStage ||
-      phase === "STAGE_7" ||
       !autoAdvance ||
       loadProgress < 100 ||
       !isTypewriterDone
@@ -843,7 +942,7 @@ export default function MoonMission({
     }
     const timeout = setTimeout(() => {
       handleNextStage();
-    }, 950);
+    }, phase === "STAGE_7" ? 1300 : 950);
     return () => clearTimeout(timeout);
   }, [currentStage, phase, autoAdvance, loadProgress, isTypewriterDone, handleNextStage]);
 
@@ -927,34 +1026,176 @@ export default function MoonMission({
   };
 
   // ─────────────────────────────────────────────────────────────────────────
-  // PHASE E: DEPLOY SEISMOMETER AT LUNAR LANDER BEACON
+  // PHASE E: 8x4 LUNAR ROVER PATH-PLANNING & COMPONENT ASSEMBLY LOGIC
   // ─────────────────────────────────────────────────────────────────────────
-  const handleDeploySeismometer = useCallback(() => {
-    if (phase !== "PHASE_E_EXPEDITION") return;
-    const totalSamples = iceCollected + he3Collected;
-    if (totalSamples < 6) {
+  const activeAssemblyMap =
+    LUNAR_ASSEMBLY_MAPS[assemblyStageIndex] || LUNAR_ASSEMBLY_MAPS[0];
+
+  const activeStagePartId =
+    selectedPowerSolution === "nuclear_reactor"
+      ? activeAssemblyMap.nuclearPartId
+      : activeAssemblyMap.solarPartId;
+
+  const activeStagePartDef =
+    FAIRING_PAYLOAD_PARTS.find((p) => p.id === activeStagePartId) ||
+    FAIRING_PAYLOAD_PARTS[0];
+
+  // Build simulated path cells starting from startCell
+  const plannedPathCells: LunarGridCell[] = React.useMemo(() => {
+    const cells: LunarGridCell[] = [activeAssemblyMap.startCell];
+    for (const move of plannedMoves) {
+      const last = cells[cells.length - 1];
+      let nextCol = last.col;
+      let nextRow = last.row;
+      if (move === "W") nextRow = Math.max(0, last.row - 1);
+      if (move === "S") nextRow = Math.min(LUNAR_GRID_ROWS - 1, last.row + 1);
+      if (move === "A") nextCol = Math.max(0, last.col - 1);
+      if (move === "D") nextCol = Math.min(LUNAR_GRID_COLS - 1, last.col + 1);
+      cells.push({ col: nextCol, row: nextRow });
+    }
+    return cells;
+  }, [activeAssemblyMap.startCell, plannedMoves]);
+
+  const simTipCell =
+    plannedPathCells[plannedPathCells.length - 1] || activeAssemblyMap.startCell;
+
+  // Find the first step index where the simulated path passes through compCell
+  const compPickupStepIndex = plannedPathCells.findIndex(
+    (c) =>
+      c.col === activeAssemblyMap.compCell.col &&
+      c.row === activeAssemblyMap.compCell.row
+  );
+
+  const hasPickedUpComponentInSim = compPickupStepIndex !== -1;
+
+  const isTipAtStation =
+    simTipCell.col === activeAssemblyMap.stationCell.col &&
+    simTipCell.row === activeAssemblyMap.stationCell.row;
+
+  // Mandatory Rule: Path must pass through `comp` BEFORE reaching `station point`
+  const isAtStationWithoutComp = isTipAtStation && !hasPickedUpComponentInSim;
+  const isReadyToStartRover =
+    hasPickedUpComponentInSim &&
+    isTipAtStation &&
+    compPickupStepIndex < plannedPathCells.length - 1;
+
+  const handleQueueLunarMove = useCallback(
+    (dir: LunarDirection) => {
+      if (phase !== "PHASE_E_EXPEDITION" || roverExecStatus !== "PLANNING") return;
+      setAssemblyHint(null);
+      setPlannedMoves((prev) => {
+        if (prev.length >= 28) return prev;
+        let curCol = activeAssemblyMap.startCell.col;
+        let curRow = activeAssemblyMap.startCell.row;
+        for (const m of prev) {
+          if (m === "W") curRow = Math.max(0, curRow - 1);
+          if (m === "S") curRow = Math.min(LUNAR_GRID_ROWS - 1, curRow + 1);
+          if (m === "A") curCol = Math.max(0, curCol - 1);
+          if (m === "D") curCol = Math.min(LUNAR_GRID_COLS - 1, curCol + 1);
+        }
+        let nextCol = curCol;
+        let nextRow = curRow;
+        if (dir === "W") nextRow = Math.max(0, curRow - 1);
+        if (dir === "S") nextRow = Math.min(LUNAR_GRID_ROWS - 1, curRow + 1);
+        if (dir === "A") nextCol = Math.max(0, curCol - 1);
+        if (dir === "D") nextCol = Math.min(LUNAR_GRID_COLS - 1, curCol + 1);
+
+        if (nextCol === curCol && nextRow === curRow) {
+          sfx.playDamage();
+          return prev;
+        }
+
+        sfx.playBlip(640 + ((prev.length * 29) % 240));
+        return [...prev, dir];
+      });
+    },
+    [phase, roverExecStatus, activeAssemblyMap.startCell]
+  );
+
+  const handleUndoLunarMove = useCallback(() => {
+    if (roverExecStatus !== "PLANNING") return;
+    sfx.playClick(520);
+    setAssemblyHint(null);
+    setPlannedMoves((prev) => prev.slice(0, -1));
+  }, [roverExecStatus]);
+
+  const handleClearLunarMoves = useCallback(() => {
+    if (roverExecStatus !== "PLANNING") return;
+    sfx.playClick(460);
+    setAssemblyHint(null);
+    setPlannedMoves([]);
+  }, [roverExecStatus]);
+
+  const handleStartLunarRover = useCallback(() => {
+    if (roverExecStatus !== "PLANNING") return;
+    if (!hasPickedUpComponentInSim) {
       sfx.playDamage();
+      setAssemblyHint("PICK UP COMPONENT FIRST BEFORE DOCKING AT STATION");
       return;
     }
-    if (!nearBeacon) {
+    if (!isTipAtStation) {
       sfx.playDamage();
+      setAssemblyHint("EXTEND PATH TO STATION POINT AFTER COLLECTING COMPONENT");
       return;
     }
-    sfx.playVictoryFanfare();
-    setSeismometerDeployed(true);
-    setScore((prev) => prev + 1500 + expeditionTimeLeft * 20 + hullShields * 300);
-    setTimeout(() => {
-      transitionToPhase("PHASE_F_VICTORY");
-    }, 650);
+    sfx.playCollect();
+    setAssemblyHint(null);
+    setRoverStepIndex(0);
+    setRoverExecStatus("DRIVING");
+  }, [roverExecStatus, hasPickedUpComponentInSim, isTipAtStation]);
+
+  // Step-by-step Lunar Rover execution animation along plannedPathCells
+  useEffect(() => {
+    if (phase !== "PHASE_E_EXPEDITION" || roverExecStatus !== "DRIVING") return;
+
+    if (roverStepIndex < plannedPathCells.length - 1) {
+      const timer = setTimeout(() => {
+        const nextIdx = roverStepIndex + 1;
+        setRoverStepIndex(nextIdx);
+        if (nextIdx === compPickupStepIndex) {
+          sfx.playCollect();
+        } else {
+          sfx.playBlip(520 + ((nextIdx * 37) % 240));
+        }
+      }, 270);
+      return () => clearTimeout(timer);
+    }
+
+    // Reached station point with component!
+    const installTimer = setTimeout(() => {
+      sfx.playVictoryFanfare();
+      setRoverExecStatus("INSTALLING");
+      setScore((prev) => prev + 650);
+    }, 260);
+    return () => clearTimeout(installTimer);
   }, [
     phase,
-    iceCollected,
-    he3Collected,
-    nearBeacon,
-    expeditionTimeLeft,
-    hullShields,
-    transitionToPhase,
+    roverExecStatus,
+    roverStepIndex,
+    plannedPathCells.length,
+    compPickupStepIndex,
   ]);
+
+  // Advance from INSTALLING -> next stage (or PHASE_F_VICTORY after Stage 4/4)
+  useEffect(() => {
+    if (phase !== "PHASE_E_EXPEDITION" || roverExecStatus !== "INSTALLING") return;
+
+    const timer = setTimeout(() => {
+      if (assemblyStageIndex < LUNAR_ASSEMBLY_MAPS.length - 1) {
+        setAssemblyStageIndex((prev) => prev + 1);
+        setPlannedMoves([]);
+        setRoverStepIndex(0);
+        setAssemblyHint(null);
+        setRoverExecStatus("PLANNING");
+        sfx.playStageTransition();
+      } else {
+        setRoverExecStatus("STAGE_COMPLETE");
+        transitionToPhase("PHASE_F_VICTORY");
+      }
+    }, 1150);
+
+    return () => clearTimeout(timer);
+  }, [phase, roverExecStatus, assemblyStageIndex, transitionToPhase]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // KEYBOARD CONTROLS ACROSS ALL PHASES
@@ -985,19 +1226,26 @@ export default function MoonMission({
       }
 
       if (phase === "PHASE_E_EXPEDITION") {
-        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-          keysRef.current.left = true;
-        }
-        if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-          keysRef.current.right = true;
-        }
-        if (e.key === "ArrowUp" || e.key === "w" || e.key === "W" || e.key === " ") {
+        if (e.key === "w" || e.key === "W" || e.key === "ArrowUp") {
           e.preventDefault();
-          keysRef.current.jump = true;
-        }
-        if (e.key === "e" || e.key === "E") {
+          handleQueueLunarMove("W");
+        } else if (e.key === "s" || e.key === "S" || e.key === "ArrowDown") {
           e.preventDefault();
-          handleDeploySeismometer();
+          handleQueueLunarMove("S");
+        } else if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleQueueLunarMove("A");
+        } else if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") {
+          e.preventDefault();
+          handleQueueLunarMove("D");
+        } else if (e.key === "Backspace") {
+          e.preventDefault();
+          handleUndoLunarMove();
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleStartLunarRover();
+        } else if (e.key === "Escape") {
+          onAbort();
         }
         return;
       }
@@ -1020,23 +1268,9 @@ export default function MoonMission({
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-        keysRef.current.left = false;
-      }
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-        keysRef.current.right = false;
-      }
-      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W" || e.key === " ") {
-        keysRef.current.jump = false;
-      }
-    };
-
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
     };
   }, [
     phase,
@@ -1047,389 +1281,12 @@ export default function MoonMission({
     handlePrevStage,
     handleToggleSolutionSlide,
     handleSelectSolution,
-    handleDeploySeismometer,
+    handleQueueLunarMove,
+    handleUndoLunarMove,
+    handleStartLunarRover,
     onAbort,
   ]);
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // PHASE E: OXYGEN / BATTERY COUNTDOWN TIMER
-  // ─────────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (phase !== "PHASE_E_EXPEDITION" || seismometerDeployed) return;
-    const timer = setInterval(() => {
-      setExpeditionTimeLeft((prev) => {
-        if (prev <= 1) {
-          sfx.playDamage();
-          setFailureReason(
-            "LUNAR ROVER BATTERY & LIFE SUPPORT DEPLETED DURING THE -200°C SOUTH POLE EXPEDITION."
-          );
-          transitionToPhase("PHASE_F_FAILURE");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [phase, seismometerDeployed, transitionToPhase]);
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // PHASE E: 2D SIDE-SCROLLING 1/6G LUNAR SURFACE CANVAS LOOP
-  // ─────────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (phase !== "PHASE_E_EXPEDITION") return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId = 0;
-    const WORLD_WIDTH = 2400;
-    const GROUND_Y = 382;
-    const BEACON_X = 2230;
-
-    // Platform ridges across the Lunar South Pole traverse
-    const ridges = [
-      { x: 310, y: 332, w: 130, h: 14 },
-      { x: 610, y: 272, w: 145, h: 14 },
-      { x: 930, y: 320, w: 130, h: 14 },
-      { x: 1255, y: 252, w: 150, h: 14 },
-      { x: 1590, y: 320, w: 125, h: 14 },
-      { x: 1900, y: 268, w: 140, h: 14 },
-    ];
-
-    const renderFrame = () => {
-      const rover = roverRef.current;
-
-      // Horizontal movement
-      const accel = 0.42;
-      const maxSpeed = 4.6;
-      if (keysRef.current.left) {
-        rover.vx = Math.max(-maxSpeed, rover.vx - accel);
-        rover.facing = -1;
-      } else if (keysRef.current.right) {
-        rover.vx = Math.min(maxSpeed, rover.vx + accel);
-        rover.facing = 1;
-      } else {
-        rover.vx *= 0.86;
-        if (Math.abs(rover.vx) < 0.05) rover.vx = 0;
-      }
-
-      // Floaty 1/6g Lunar Jump + Thruster Assist
-      if (keysRef.current.jump) {
-        if (rover.onGround) {
-          rover.vy = -7.8; // Floaty 1/6g leap
-          rover.onGround = false;
-          sfx.playJump();
-        } else if (rover.vy > -3.2) {
-          // Gentle 1/6g cold-gas thruster boost
-          rover.vy -= 0.22;
-          particlesRef.current.push({
-            x: rover.x + 22,
-            y: rover.y + 32,
-            vx: (Math.random() - 0.5) * 1.6,
-            vy: 2.2 + Math.random() * 1.5,
-            life: 0,
-            maxLife: 18,
-            color: "#38bdf8",
-          });
-        }
-      }
-
-      // 1/6th Lunar Gravity (floaty descent)
-      rover.vy = Math.min(5.2, rover.vy + 0.18);
-      rover.x = Math.max(24, Math.min(WORLD_WIDTH - 64, rover.x + rover.vx));
-      rover.y += rover.vy;
-
-      // Ground & Platform Collision
-      rover.onGround = false;
-      for (const ridge of ridges) {
-        if (
-          rover.vy >= 0 &&
-          rover.x + 36 > ridge.x &&
-          rover.x + 8 < ridge.x + ridge.w &&
-          rover.y + 34 >= ridge.y &&
-          rover.y + 34 <= ridge.y + ridge.h + 10
-        ) {
-          rover.y = ridge.y - 34;
-          rover.vy = 0;
-          rover.onGround = true;
-        }
-      }
-
-      if (rover.y + 34 >= GROUND_Y) {
-        rover.y = GROUND_Y - 34;
-        rover.vy = 0;
-        rover.onGround = true;
-      }
-
-      if (rover.invulnFrames > 0) {
-        rover.invulnFrames -= 1;
-      }
-
-      // Check Sample Collection
-      for (const sample of samplesRef.current) {
-        if (!sample.collected) {
-          const dx = rover.x + 22 - sample.x;
-          const dy = rover.y + 17 - sample.y;
-          if (Math.hypot(dx, dy) < 34) {
-            sample.collected = true;
-            sfx.playCollect();
-            setScore((prev) => prev + 350);
-            if (sample.type === "ICE_CRYSTAL") {
-              setIceCollected((prev) => prev + 1);
-            } else {
-              setHe3Collected((prev) => prev + 1);
-            }
-            for (let i = 0; i < 12; i++) {
-              particlesRef.current.push({
-                x: sample.x,
-                y: sample.y,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 0,
-                maxLife: 24,
-                color: sample.type === "ICE_CRYSTAL" ? "#22d3ee" : "#fbbf24",
-              });
-            }
-          }
-        }
-      }
-
-      // Update & Check Hazards (Craters & Rolling Micrometeorite Boulders)
-      for (const haz of hazardsRef.current) {
-        if (haz.type === "BOULDER") {
-          haz.x += haz.vx;
-          if (haz.x < 320) haz.x = WORLD_WIDTH - 180;
-        }
-
-        const hitX = rover.x + 34 > haz.x + 6 && rover.x + 8 < haz.x + haz.w - 6;
-        const hitY = rover.y + 34 > haz.y + 4 && rover.y + 6 < haz.y + haz.h;
-
-        if (hitX && hitY && rover.invulnFrames === 0) {
-          rover.invulnFrames = 65;
-          rover.vy = -5.2;
-          rover.vx = -rover.facing * 3.5;
-          sfx.playDamage();
-          setHullShields((prev) => {
-            const next = prev - 1;
-            if (next <= 0) {
-              setFailureReason(
-                "LUNAR ROVER HULL INTEGRITY CRITICAL AFTER CRATER / MICROMETEORITE IMPACT."
-              );
-              transitionToPhase("PHASE_F_FAILURE");
-            }
-            return Math.max(0, next);
-          });
-        }
-      }
-
-      // Check proximity to Lunar Lander Beacon Zone
-      const isNear = Math.abs(rover.x - BEACON_X) < 95;
-      setNearBeacon(isNear);
-
-      // Camera viewport tracking
-      const camX = Math.max(
-        0,
-        Math.min(WORLD_WIDTH - canvas.width, rover.x - canvas.width * 0.35)
-      );
-
-      // ─────────────────────────────────────────────────────────────────────
-      // RENDER 16-BIT PIXEL ART LUNAR SOUTH POLE SCENE
-      // ─────────────────────────────────────────────────────────────────────
-      ctx.fillStyle = "#030712";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Deep space starfield (parallax)
-      for (let i = 0; i < 65; i++) {
-        const sx = ((i * 173 - camX * 0.15) % canvas.width + canvas.width) % canvas.width;
-        const sy = (i * 79) % 270;
-        ctx.fillStyle = i % 4 === 0 ? "#67e8f9" : "#f8fafc";
-        ctx.fillRect(sx, sy, i % 3 === 0 ? 2 : 1.5, i % 3 === 0 ? 2 : 1.5);
-      }
-
-      // Blue & White Pixel Earth hanging on the horizon
-      const earthX = 760 - camX * 0.08;
-      const earthY = 82;
-      ctx.save();
-      ctx.fillStyle = "#0284c7";
-      ctx.beginPath();
-      ctx.arc(earthX, earthY, 34, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#22c55e";
-      ctx.fillRect(earthX - 16, earthY - 12, 18, 12);
-      ctx.fillRect(earthX + 4, earthY + 2, 14, 10);
-      ctx.fillStyle = "rgba(255,255,255,0.75)";
-      ctx.fillRect(earthX - 20, earthY - 4, 28, 4);
-      ctx.fillRect(earthX - 8, earthY + 12, 22, 4);
-      ctx.strokeStyle = "#38bdf8";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
-
-      // Distant South Pole Crater Rim Mountains (Parallax)
-      ctx.fillStyle = "#1e293b";
-      for (let i = 0; i < 14; i++) {
-        const mx = i * 220 - (camX * 0.35) % 220;
-        const mh = 75 + (i % 3) * 32;
-        ctx.beginPath();
-        ctx.moveTo(mx - 40, GROUND_Y);
-        ctx.lineTo(mx + 70, GROUND_Y - mh);
-        ctx.lineTo(mx + 190, GROUND_Y);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      ctx.save();
-      ctx.translate(-camX, 0);
-
-      // Lunar Regolith Surface Floor
-      ctx.fillStyle = "#475569";
-      ctx.fillRect(0, GROUND_Y, WORLD_WIDTH, canvas.height - GROUND_Y);
-      ctx.fillStyle = "#94a3b8";
-      ctx.fillRect(0, GROUND_Y, WORLD_WIDTH, 5);
-
-      // Elevated Crater Ridges / Platforms
-      for (const ridge of ridges) {
-        ctx.fillStyle = "#334155";
-        ctx.fillRect(ridge.x, ridge.y, ridge.w, ridge.h);
-        ctx.fillStyle = "#67e8f9";
-        ctx.fillRect(ridge.x, ridge.y, ridge.w, 3);
-      }
-
-      // Draw Craters & Rolling Micrometeorite Boulders
-      for (const haz of hazardsRef.current) {
-        if (haz.type === "CRATER") {
-          // Permanently Shadowed Dark Crater Pit
-          ctx.fillStyle = "#090d16";
-          ctx.fillRect(haz.x, GROUND_Y - 2, haz.w, 36);
-          ctx.strokeStyle = "#f43f5e";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(haz.x, GROUND_Y - 2, haz.w, 32);
-          ctx.fillStyle = "#f43f5e";
-          ctx.font = "bold 9px monospace";
-          ctx.fillText("CRATER HAZARD", haz.x + 8, GROUND_Y + 18);
-        } else {
-          // Rolling Boulder
-          ctx.fillStyle = "#f97316";
-          ctx.fillRect(haz.x, haz.y, haz.w, haz.h);
-          ctx.strokeStyle = "#fde047";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(haz.x, haz.y, haz.w, haz.h);
-          ctx.fillStyle = "#7c2d12";
-          ctx.fillRect(haz.x + 6, haz.y + 6, 8, 8);
-        }
-      }
-
-      // Draw Collectible Lunar Samples (Water Ice Crystals & Helium-3 Cores)
-      const pulse = Math.sin(performance.now() * 0.006) * 4;
-      for (const sample of samplesRef.current) {
-        if (sample.collected) continue;
-        const sy = sample.y + pulse;
-        if (sample.type === "ICE_CRYSTAL") {
-          // Glowing Cyan Polar Water Ice Crystal
-          ctx.fillStyle = "#06b6d4";
-          ctx.fillRect(sample.x - 10, sy - 12, 20, 24);
-          ctx.fillStyle = "#cffafe";
-          ctx.fillRect(sample.x - 5, sy - 7, 10, 14);
-          ctx.strokeStyle = "#67e8f9";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(sample.x - 12, sy - 14, 24, 28);
-          ctx.fillStyle = "#67e8f9";
-          ctx.font = "bold 10px monospace";
-          ctx.fillText("H2O ICE", sample.x - 20, sy - 18);
-        } else {
-          // Glowing Golden Helium-3 Regolith Core
-          ctx.fillStyle = "#f59e0b";
-          ctx.fillRect(sample.x - 11, sy - 11, 22, 22);
-          ctx.fillStyle = "#fef08a";
-          ctx.fillRect(sample.x - 6, sy - 6, 12, 12);
-          ctx.strokeStyle = "#fde047";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(sample.x - 13, sy - 13, 26, 26);
-          ctx.fillStyle = "#fde047";
-          ctx.font = "bold 10px monospace";
-          ctx.fillText("HE-3 CORE", sample.x - 24, sy - 18);
-        }
-      }
-
-      // Draw Lunar Lander & Fission Surface Power Beacon Zone at the End of Traverse
-      ctx.fillStyle = "#eab308";
-      ctx.fillRect(BEACON_X - 28, GROUND_Y - 78, 56, 52);
-      ctx.fillStyle = "#cbd5e1";
-      ctx.fillRect(BEACON_X - 22, GROUND_Y - 112, 44, 34);
-      ctx.strokeStyle = "#22d3ee";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(BEACON_X - 36, GROUND_Y - 122, 72, 122);
-      // Landing legs
-      ctx.strokeStyle = "#eab308";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(BEACON_X - 26, GROUND_Y - 26);
-      ctx.lineTo(BEACON_X - 42, GROUND_Y);
-      ctx.moveTo(BEACON_X + 26, GROUND_Y - 26);
-      ctx.lineTo(BEACON_X + 42, GROUND_Y);
-      ctx.stroke();
-
-      ctx.fillStyle = "#22d3ee";
-      ctx.font = "bold 11px monospace";
-      ctx.fillText("LUNAR LANDER BEACON ZONE", BEACON_X - 75, GROUND_Y - 130);
-
-      // Update & Draw Thruster Particles
-      for (let i = particlesRef.current.length - 1; i >= 0; i--) {
-        const pt = particlesRef.current[i];
-        pt.x += pt.vx;
-        pt.y += pt.vy;
-        pt.life += 1;
-        if (pt.life >= pt.maxLife) {
-          particlesRef.current.splice(i, 1);
-          continue;
-        }
-        ctx.fillStyle = pt.color;
-        ctx.fillRect(pt.x, pt.y, 4, 4);
-      }
-
-      // Draw 16-Bit Pixel Lunar Rover & Astronaut
-      if (rover.invulnFrames % 4 < 2) {
-        // Rover chassis
-        ctx.fillStyle = "#e2e8f0";
-        ctx.fillRect(rover.x + 4, rover.y + 14, 38, 12);
-        // Gold thermal blanket trim
-        ctx.fillStyle = "#f59e0b";
-        ctx.fillRect(rover.x + 10, rover.y + 16, 26, 6);
-        // Astronaut helmet & suit
-        ctx.fillStyle = "#f8fafc";
-        ctx.fillRect(rover.x + 14, rover.y + 2, 16, 14);
-        // Gold reflective visor
-        ctx.fillStyle = "#38bdf8";
-        ctx.fillRect(
-          rover.facing === 1 ? rover.x + 21 : rover.x + 15,
-          rover.y + 5,
-          7,
-          6
-        );
-        // High-gain dish antenna
-        ctx.fillStyle = "#22d3ee";
-        ctx.fillRect(rover.x + 6, rover.y + 4, 4, 10);
-        // Rover wheels
-        ctx.fillStyle = "#0f172a";
-        ctx.fillRect(rover.x + 4, rover.y + 24, 10, 10);
-        ctx.fillRect(rover.x + 30, rover.y + 24, 10, 10);
-        ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(rover.x + 4, rover.y + 24, 10, 10);
-        ctx.strokeRect(rover.x + 30, rover.y + 24, 10, 10);
-      }
-
-      ctx.restore();
-
-      animId = requestAnimationFrame(renderFrame);
-    };
-
-    animId = requestAnimationFrame(renderFrame);
-    return () => cancelAnimationFrame(animId);
-  }, [phase, transitionToPhase]);
-
-  const totalSamplesCollected = iceCollected + he3Collected;
   const finalRank = score >= 3600 ? "S" : score >= 2600 ? "A" : "B";
 
   const activeSolutionSlide =
@@ -1448,7 +1305,7 @@ export default function MoonMission({
           : currentStage
             ? "PHASE D // SATURN V ASCENT & TRANSLUNAR TRANSIT"
             : phase === "PHASE_E_EXPEDITION"
-              ? "PHASE E // LUNAR SURFACE OPERATIONS (1/6G EXPEDITION)"
+              ? `PHASE E // LUNAR ROVER COMPONENT ASSEMBLY (${assemblyStageIndex + 1}/4)`
               : "PHASE F // LUNAR MISSION CLOSEOUT & ARCHIVAL REPORT";
 
   return (
@@ -2237,7 +2094,7 @@ export default function MoonMission({
                   onClick={() => transitionToPhase("PHASE_E_EXPEDITION")}
                   className="px-4 py-2.5 bg-emerald-400 hover:bg-emerald-300 border-2 border-white text-slate-950 font-press-start text-[10px] sm:text-xs font-bold shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn animate-pulse"
                 >
-                  [ START PHASE E: 1/6G LUNAR SURFACE EXPEDITION &gt; ]
+                  [ START PHASE E: LUNAR ROVER COMPONENT ASSEMBLY &gt; ]
                 </button>
               </div>
             </div>
@@ -2245,132 +2102,424 @@ export default function MoonMission({
         )}
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/* PHASE E: 2D LUNAR SURFACE ROVER & 1/6G SAMPLE EXPEDITION    */}
+        {/* PHASE E: 4-STAGE SEQUENTIAL LUNAR ROVER COMPONENT ASSEMBLY   */}
         {/* ═══════════════════════════════════════════════════════════ */}
         {phase === "PHASE_E_EXPEDITION" && (
-          <div className="my-auto mx-auto w-full max-w-5xl bg-slate-950/95 border-2 border-cyan-400 p-3 sm:p-4 shadow-[8px_8px_0px_#000] space-y-3">
-            {/* Top Expedition Telemetry Strip */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-400/40 pb-2">
-              <div className="flex items-center gap-2">
-                <Compass className="w-4 h-4 text-cyan-400" />
-                <span className="font-press-start text-[10px] text-cyan-300">
-                  PHASE E // LUNAR SOUTH POLE 1/6G EXPEDITION
+          <div className="fixed inset-0 top-[46px] z-30 bg-black select-none overflow-hidden">
+            {/* Full-Screen 8x4 Lunar Surface Grid Background Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={activeAssemblyMap.gridImage}
+              alt={activeAssemblyMap.title}
+              className="w-full h-full object-cover object-center pointer-events-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Top-Left Stage Progress & Active Component HUD Banner */}
+            <div className="absolute left-[2.2%] top-[1.2%] z-30 flex flex-wrap items-center gap-2 bg-slate-950/90 border-2 border-cyan-400 px-3 py-1.5 shadow-[4px_4px_0px_#000]">
+              <span className="px-2 py-0.5 bg-cyan-400 text-slate-950 font-press-start text-[8px] sm:text-[9px] font-bold">
+                {`MAP ${assemblyStageIndex + 1} / 4`}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <FairingPartPixelIcon
+                  partId={activeStagePartDef.id}
+                  className="w-5 h-5"
+                />
+                <span className="font-press-start text-[8px] sm:text-[9px] text-white tracking-wider">
+                  {`${activeAssemblyMap.compBadge}: ${activeStagePartDef.name.toUpperCase()}`}
+                </span>
+              </div>
+              <div className="hidden xl:flex items-center gap-1 ml-2 pl-2 border-l border-cyan-400/40">
+                {LUNAR_ASSEMBLY_MAPS.map((m, idx) => {
+                  const isDone = idx < assemblyStageIndex;
+                  const isCurrent = idx === assemblyStageIndex;
+                  return (
+                    <span
+                      key={m.compCode}
+                      className={`px-1.5 py-0.5 font-press-start text-[7px] border ${
+                        isDone
+                          ? "bg-emerald-500 text-slate-950 border-white"
+                          : isCurrent
+                            ? "bg-cyan-950 text-cyan-200 border-cyan-300 animate-pulse"
+                            : "bg-slate-900 text-slate-500 border-slate-700"
+                      }`}
+                    >
+                      {isDone ? `${m.compBadge} ✓` : m.compBadge}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 8x4 Interactive Grid Overlay (Cols 0-7, Rows 0-3) */}
+            <div className="absolute left-[9.6%] top-[5.2%] w-[83.4%] h-[74.2%] z-20">
+              {/* SVG Telemetry Path-Simulation Line Overlay */}
+              <svg
+                viewBox="0 0 800 400"
+                preserveAspectRatio="none"
+                className="absolute inset-0 w-full h-full pointer-events-none z-20"
+              >
+                {plannedPathCells.length > 1 && (
+                  <>
+                    {/* Outer Glow Polyline */}
+                    <polyline
+                      fill="none"
+                      stroke={
+                        isReadyToStartRover
+                          ? "rgba(52, 211, 153, 0.55)"
+                          : hasPickedUpComponentInSim
+                            ? "rgba(250, 204, 21, 0.5)"
+                            : "rgba(34, 211, 238, 0.5)"
+                      }
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={plannedPathCells
+                        .map(
+                          (c) => `${c.col * 100 + 50},${c.row * 100 + 50}`
+                        )
+                        .join(" ")}
+                    />
+                    {/* Crisp Dashed Telemetry Path Line */}
+                    <polyline
+                      fill="none"
+                      stroke={
+                        isReadyToStartRover
+                          ? "#34d399"
+                          : hasPickedUpComponentInSim
+                            ? "#fde047"
+                            : "#22d3ee"
+                      }
+                      strokeWidth="5"
+                      strokeDasharray="12 8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={plannedPathCells
+                        .map(
+                          (c) => `${c.col * 100 + 50},${c.row * 100 + 50}`
+                        )
+                        .join(" ")}
+                    />
+                  </>
+                )}
+
+                {/* Waypoint Nodes Along the Simulated Path */}
+                {plannedPathCells.map((c, idx) => {
+                  if (idx === 0) return null;
+                  const cx = c.col * 100 + 50;
+                  const cy = c.row * 100 + 50;
+                  const isTip = idx === plannedPathCells.length - 1;
+                  const isCompNode = idx === compPickupStepIndex;
+                  return (
+                    <g key={`${c.col}-${c.row}-${idx}`}>
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={isTip || isCompNode ? 9 : 5}
+                        fill={
+                          isReadyToStartRover
+                            ? "#34d399"
+                            : isCompNode
+                              ? "#fde047"
+                              : "#22d3ee"
+                        }
+                        stroke="#020617"
+                        strokeWidth="2.5"
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* 8 Columns x 4 Rows Interactive Grid Cells */}
+              <div className="w-full h-full grid grid-cols-8 grid-rows-4">
+                {Array.from({ length: LUNAR_GRID_ROWS }).map((_, rIdx) =>
+                  Array.from({ length: LUNAR_GRID_COLS }).map((__, cIdx) => {
+                    const isStartCell =
+                      activeAssemblyMap.startCell.col === cIdx &&
+                      activeAssemblyMap.startCell.row === rIdx;
+                    const isCompCell =
+                      activeAssemblyMap.compCell.col === cIdx &&
+                      activeAssemblyMap.compCell.row === rIdx;
+                    const isStationCell =
+                      activeAssemblyMap.stationCell.col === cIdx &&
+                      activeAssemblyMap.stationCell.row === rIdx;
+
+                    // Active Rover Position (stays at startCell during PLANNING, moves step-by-step during DRIVING/INSTALLING)
+                    const currentRoverCell =
+                      roverExecStatus === "PLANNING"
+                        ? activeAssemblyMap.startCell
+                        : plannedPathCells[roverStepIndex] ||
+                          activeAssemblyMap.startCell;
+
+                    const isRoverHere =
+                      currentRoverCell.col === cIdx &&
+                      currentRoverCell.row === rIdx;
+
+                    // Has the driving rover physically picked up the component yet?
+                    const hasRoverPhysicallyPickedUpComp =
+                      roverExecStatus !== "PLANNING" &&
+                      compPickupStepIndex !== -1 &&
+                      roverStepIndex >= compPickupStepIndex;
+
+                    const isSimTipHere =
+                      roverExecStatus === "PLANNING" &&
+                      plannedMoves.length > 0 &&
+                      simTipCell.col === cIdx &&
+                      simTipCell.row === rIdx;
+
+                    // Allow clicking adjacent cell to queue a W/A/S/D move
+                    const dCol = cIdx - simTipCell.col;
+                    const dRow = rIdx - simTipCell.row;
+                    const isAdjacentToTip =
+                      roverExecStatus === "PLANNING" &&
+                      Math.abs(dCol) + Math.abs(dRow) === 1;
+
+                    const handleCellClick = () => {
+                      if (!isAdjacentToTip) return;
+                      if (dRow === -1) handleQueueLunarMove("W");
+                      else if (dRow === 1) handleQueueLunarMove("S");
+                      else if (dCol === -1) handleQueueLunarMove("A");
+                      else if (dCol === 1) handleQueueLunarMove("D");
+                    };
+
+                    return (
+                      <div
+                        key={`lunar-cell-${cIdx}-${rIdx}`}
+                        onClick={handleCellClick}
+                        className={`relative flex items-center justify-center transition-colors ${
+                          isAdjacentToTip
+                            ? "cursor-pointer hover:bg-cyan-400/15"
+                            : ""
+                        }`}
+                        title={`Grid (${cIdx}, ${rIdx})`}
+                      >
+                        {/* Component Crate & 16-Bit Hardware Sprite at compCell */}
+                        {isCompCell && !hasRoverPhysicallyPickedUpComp && (
+                          <div
+                            className={`relative z-20 flex flex-col items-center justify-center px-2 py-1 border-2 shadow-[0_0_16px_rgba(0,0,0,0.9)] transition-all ${
+                              hasPickedUpComponentInSim
+                                ? "bg-emerald-950/95 border-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.9)] scale-105"
+                                : "bg-slate-950/90 border-amber-300 shadow-[0_0_14px_rgba(251,191,36,0.75)] animate-pulse"
+                            }`}
+                          >
+                            <FairingPartPixelIcon
+                              partId={activeStagePartDef.id}
+                              className="w-7 h-7 sm:w-9 sm:h-9"
+                            />
+                            <span
+                              className={`mt-0.5 px-1.5 py-0.5 font-press-start text-[6px] sm:text-[7px] font-bold tracking-wider ${
+                                hasPickedUpComponentInSim
+                                  ? "bg-emerald-400 text-slate-950"
+                                  : "bg-amber-300 text-slate-950"
+                              }`}
+                            >
+                              {hasPickedUpComponentInSim
+                                ? `${activeAssemblyMap.compBadge} ACQUIRED ✓`
+                                : `${activeAssemblyMap.compBadge}: ${activeStagePartDef.shortLabel}`}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Lunar Outpost Station Sprite at stationCell */}
+                        {isStationCell && (
+                          <div
+                            className={`relative z-20 flex flex-col items-center justify-center px-2 py-1 border-2 transition-all ${
+                              roverExecStatus === "INSTALLING"
+                                ? "bg-emerald-950/95 border-emerald-300 shadow-[0_0_24px_rgba(52,211,153,1)] scale-110"
+                                : isReadyToStartRover
+                                  ? "bg-emerald-950/85 border-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.85)]"
+                                  : isAtStationWithoutComp
+                                    ? "bg-rose-950/90 border-rose-400 shadow-[0_0_16px_rgba(244,63,94,0.9)]"
+                                    : "bg-slate-950/90 border-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.7)]"
+                            }`}
+                          >
+                            <LunarStationPixelSprite
+                              installedCount={
+                                roverExecStatus === "INSTALLING"
+                                  ? assemblyStageIndex + 1
+                                  : assemblyStageIndex
+                              }
+                              isDocking={roverExecStatus === "INSTALLING"}
+                              className="w-9 h-8 sm:w-12 sm:h-10"
+                            />
+                            <span
+                              className={`mt-0.5 px-1.5 py-0.5 font-press-start text-[6px] sm:text-[7px] font-bold ${
+                                roverExecStatus === "INSTALLING" ||
+                                isReadyToStartRover
+                                  ? "bg-emerald-400 text-slate-950"
+                                  : isAtStationWithoutComp
+                                    ? "bg-rose-500 text-white"
+                                    : "bg-cyan-300 text-slate-950"
+                              }`}
+                            >
+                              {roverExecStatus === "INSTALLING"
+                                ? "INSTALLING MODULE..."
+                                : `LUNAR STATION (${assemblyStageIndex}/4)`}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Lunar Exploration Rover Sprite */}
+                        {isRoverHere && (
+                          <div className="relative z-30 flex flex-col items-center justify-center pointer-events-none">
+                            <div className="p-1 bg-slate-950/90 border-2 border-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.95)]">
+                              <LunarRoverPixelSprite
+                                carryingPartId={
+                                  hasRoverPhysicallyPickedUpComp
+                                    ? activeStagePartDef.id
+                                    : null
+                                }
+                                className="w-10 h-8 sm:w-13 sm:h-10"
+                              />
+                            </div>
+                            <span className="mt-0.5 px-1.5 py-0.5 bg-cyan-400 text-slate-950 font-press-start text-[6px] sm:text-[7px] font-bold shadow-[2px_2px_0px_#000]">
+                              {hasRoverPhysicallyPickedUpComp
+                                ? `CARRYING ${activeStagePartDef.shortLabel}`
+                                : isStartCell && roverExecStatus === "PLANNING"
+                                  ? "LUNAR ROVER // START"
+                                  : "LUNAR ROVER"}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Simulated Path Tip Cursor Marker during PLANNING */}
+                        {isSimTipHere && !isRoverHere && (
+                          <div
+                            className={`z-30 pointer-events-none px-1.5 py-0.5 border font-press-start text-[6px] sm:text-[7px] shadow-[2px_2px_0px_#000] ${
+                              isReadyToStartRover
+                                ? "bg-emerald-400 text-slate-950 border-white animate-bounce"
+                                : isAtStationWithoutComp
+                                  ? "bg-rose-600 text-white border-rose-200 animate-pulse"
+                                  : "bg-cyan-950/95 text-cyan-200 border-cyan-300"
+                            }`}
+                          >
+                            {isReadyToStartRover
+                              ? "READY TO DOCK ✓"
+                              : isAtStationWithoutComp
+                                ? "MISSING COMP!"
+                                : `STEP ${plannedMoves.length}`}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Bottom-Left HUD Mask Over Static "press WASD to move" Box */}
+            <div className="absolute left-[9.2%] bottom-[3.2%] w-[48%] sm:w-[44%] min-h-[13.5%] z-30 bg-slate-950/95 border-2 border-cyan-400 p-2 sm:p-3 shadow-[6px_6px_0px_#000] flex flex-col justify-between gap-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-cyan-400/40 pb-1">
+                <div className="flex items-center gap-1.5">
+                  <Package className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                  <span className="font-press-start text-[7px] sm:text-[9px] text-cyan-200">
+                    {`PRESS WASD TO PLAN ROUTE: START -> ${activeAssemblyMap.compBadge} -> STATION`}
+                  </span>
+                </div>
+                <span
+                  className={`px-1.5 py-0.5 font-press-start text-[7px] border ${
+                    hasPickedUpComponentInSim
+                      ? "bg-emerald-950 border-emerald-400 text-emerald-300"
+                      : "bg-amber-950/90 border-amber-400 text-amber-300"
+                  }`}
+                >
+                  {hasPickedUpComponentInSim
+                    ? "COMPONENT ACQUIRED ✓"
+                    : `1. PICK UP ${activeAssemblyMap.compBadge}`}
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 font-silkscreen text-xs">
-                {/* Hull Shields */}
-                <div className="flex items-center gap-1 px-2.5 py-1 bg-slate-900 border border-rose-400/60">
-                  <Shield className="w-3.5 h-3.5 text-rose-400" />
-                  <span className="text-slate-200 mr-1">HULL:</span>
-                  {Array.from({ length: 3 }).map((_, idx) => (
-                    <Heart
-                      key={idx}
-                      className={`w-3.5 h-3.5 ${
-                        idx < hullShields
-                          ? "text-rose-400 fill-rose-400"
-                          : "text-slate-700"
-                      }`}
-                    />
+              {/* Warning / Status Banner */}
+              {(isAtStationWithoutComp || assemblyHint) && (
+                <div className="px-2 py-1 bg-rose-950/95 border border-rose-400 text-rose-200 font-press-start text-[7px] sm:text-[8px] animate-pulse">
+                  {assemblyHint ||
+                    "PICK UP COMPONENT FIRST BEFORE DOCKING AT STATION"}
+                </div>
+              )}
+
+              {/* D-Pad Controls + Queued Moves Readout + Undo/Clear */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  {(["W", "A", "S", "D"] as LunarDirection[]).map((dir) => (
+                    <button
+                      key={dir}
+                      type="button"
+                      disabled={roverExecStatus !== "PLANNING"}
+                      onClick={() => handleQueueLunarMove(dir)}
+                      className="w-7 h-7 sm:w-8 sm:h-8 bg-slate-900 hover:bg-cyan-400 hover:text-slate-950 border-2 border-cyan-400 text-cyan-200 font-press-start text-[9px] sm:text-[10px] font-bold shadow-[2px_2px_0px_#000] cursor-pointer disabled:opacity-40"
+                    >
+                      {dir}
+                    </button>
                   ))}
                 </div>
 
-                {/* Water Ice Samples */}
-                <div className="px-2.5 py-1 bg-slate-900 border border-cyan-400/60 text-cyan-300">
-                  H2O ICE: <strong className="text-white">{iceCollected} / 3</strong>
+                <div className="flex-1 min-w-[90px] px-2 py-1 bg-slate-900/90 border border-slate-700 font-silkscreen text-[9px] sm:text-[10px] text-cyan-200 truncate">
+                  {plannedMoves.length === 0
+                    ? "QUEUE: [ EMPTY — USE WASD OR CLICK ADJACENT CELLS ]"
+                    : `QUEUE (${plannedMoves.length}): ${plannedMoves.join(" → ")}`}
                 </div>
 
-                {/* Helium-3 Cores */}
-                <div className="px-2.5 py-1 bg-slate-900 border border-amber-400/60 text-amber-300">
-                  HE-3 CORES: <strong className="text-white">{he3Collected} / 3</strong>
-                </div>
-
-                {/* O2 / Battery Timer */}
-                <div
-                  className={`px-2.5 py-1 border font-bold ${
-                    expeditionTimeLeft <= 20
-                      ? "bg-rose-950 border-rose-400 text-rose-300 animate-pulse"
-                      : "bg-slate-900 border-emerald-400/60 text-emerald-300"
-                  }`}
-                >
-                  O2 / BATTERY: {expeditionTimeLeft}s
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={
+                      roverExecStatus !== "PLANNING" ||
+                      plannedMoves.length === 0
+                    }
+                    onClick={handleUndoLunarMove}
+                    className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-400 text-slate-200 font-press-start text-[7px] sm:text-[8px] cursor-pointer disabled:opacity-40"
+                  >
+                    [ UNDO ]
+                  </button>
+                  <button
+                    type="button"
+                    disabled={
+                      roverExecStatus !== "PLANNING" ||
+                      plannedMoves.length === 0
+                    }
+                    onClick={handleClearLunarMoves}
+                    className="px-2 py-1 bg-rose-950/90 hover:bg-rose-900 border border-rose-400 text-rose-200 font-press-start text-[7px] sm:text-[8px] cursor-pointer disabled:opacity-40"
+                  >
+                    [ CLEAR ]
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* 2D HTML5 Canvas */}
-            <div className="relative w-full overflow-hidden border-2 border-slate-700 bg-black">
-              <canvas
-                ref={canvasRef}
-                width={920}
-                height={420}
-                className="w-full h-[290px] sm:h-[360px] block"
-              />
-
-              {/* Beacon Action Prompt Banner */}
-              {totalSamplesCollected >= 6 && (
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-emerald-950/95 border-2 border-emerald-400 text-emerald-200 font-press-start text-[10px] shadow-[4px_4px_0px_#000] animate-bounce">
-                  ALL 6 SAMPLES COLLECTED! DRIVE RIGHT TO LANDER BEACON &amp; PRESS [E]
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Controls & Deploy Seismometer Button */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              {/* Touch / On-screen Controls */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onMouseDown={() => (keysRef.current.left = true)}
-                  onMouseUp={() => (keysRef.current.left = false)}
-                  onMouseLeave={() => (keysRef.current.left = false)}
-                  onTouchStart={() => (keysRef.current.left = true)}
-                  onTouchEnd={() => (keysRef.current.left = false)}
-                  className="px-3 py-2 bg-slate-900 active:bg-cyan-500 active:text-slate-950 border-2 border-cyan-400 text-cyan-200 font-press-start text-[10px] cursor-pointer"
-                >
-                  &lt; LEFT [A]
-                </button>
-                <button
-                  type="button"
-                  onMouseDown={() => (keysRef.current.jump = true)}
-                  onMouseUp={() => (keysRef.current.jump = false)}
-                  onMouseLeave={() => (keysRef.current.jump = false)}
-                  onTouchStart={() => (keysRef.current.jump = true)}
-                  onTouchEnd={() => (keysRef.current.jump = false)}
-                  className="px-3.5 py-2 bg-cyan-950 active:bg-cyan-400 active:text-slate-950 border-2 border-cyan-300 text-cyan-200 font-press-start text-[10px] cursor-pointer"
-                >
-                  1/6G THRUSTER JUMP [SPACE]
-                </button>
-                <button
-                  type="button"
-                  onMouseDown={() => (keysRef.current.right = true)}
-                  onMouseUp={() => (keysRef.current.right = false)}
-                  onMouseLeave={() => (keysRef.current.right = false)}
-                  onTouchStart={() => (keysRef.current.right = true)}
-                  onTouchEnd={() => (keysRef.current.right = false)}
-                  className="px-3 py-2 bg-slate-900 active:bg-cyan-500 active:text-slate-950 border-2 border-cyan-400 text-cyan-200 font-press-start text-[10px] cursor-pointer"
-                >
-                  RIGHT [D] &gt;
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={totalSamplesCollected < 6 || !nearBeacon}
-                  onClick={handleDeploySeismometer}
-                  className={`px-4 py-2 border-2 font-press-start text-[10px] uppercase shadow-[4px_4px_0px_#000] flex items-center gap-1.5 ${
-                    totalSamplesCollected >= 6 && nearBeacon
-                      ? "bg-emerald-400 hover:bg-emerald-300 border-white text-slate-950 cursor-pointer animate-pulse"
-                      : "bg-slate-900 border-slate-700 text-slate-500 cursor-not-allowed"
-                  }`}
-                >
-                  <Radio className="w-3.5 h-3.5" />
-                  <span>
-                    [E] DEPLOY SEISMOMETER ({totalSamplesCollected}/6 SAMPLES)
-                  </span>
-                </button>
-              </div>
+            {/* Bottom-Right HUD Mask Over Static "start" Button Box */}
+            <div className="absolute left-[68.0%] bottom-[3.2%] w-[25.5%] min-h-[13.5%] z-30 flex items-stretch">
+              <button
+                type="button"
+                disabled={
+                  roverExecStatus !== "PLANNING" || !isReadyToStartRover
+                }
+                onClick={handleStartLunarRover}
+                className={`w-full px-3 py-2 border-2 font-press-start text-[9px] sm:text-xs md:text-sm font-bold uppercase shadow-[6px_6px_0px_#000] transition-all flex flex-col items-center justify-center gap-1 ${
+                  roverExecStatus !== "PLANNING"
+                    ? "bg-amber-400 border-white text-slate-950 cursor-wait"
+                    : isReadyToStartRover
+                      ? "bg-emerald-400 hover:bg-emerald-300 border-white text-slate-950 cursor-pointer arcade-btn animate-pulse shadow-[0_0_20px_rgba(52,211,153,0.85)]"
+                      : "bg-slate-950/95 border-cyan-500/60 text-slate-400 cursor-not-allowed"
+                }`}
+              >
+                <span>
+                  {roverExecStatus === "DRIVING"
+                    ? "ROVER DRIVING..."
+                    : roverExecStatus === "INSTALLING"
+                      ? `INSTALLING ${activeAssemblyMap.compBadge}...`
+                      : "[ START ROVER / EXECUTE ]"}
+                </span>
+                <span className="font-silkscreen text-[8px] sm:text-[9px] tracking-normal opacity-90">
+                  {roverExecStatus !== "PLANNING"
+                    ? `STEP ${roverStepIndex} / ${plannedPathCells.length - 1}`
+                    : isReadyToStartRover
+                      ? `DELIVER ${activeStagePartDef.shortLabel} TO STATION`
+                      : !hasPickedUpComponentInSim
+                        ? `PASS OVER ${activeAssemblyMap.compBadge} FIRST`
+                        : "NOW CONNECT PATH TO STATION"}
+                </span>
+              </button>
             </div>
           </div>
         )}
@@ -2395,7 +2544,7 @@ export default function MoonMission({
               <div className="md:col-span-7 space-y-3">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-emerald-950 border border-emerald-400 text-emerald-300 font-press-start text-[9px]">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>PHASE F // LUNAR MISSION CLOSEOUT &amp; ARCHIVAL REPORT</span>
+                  <span>{`PHASE F // LUNAR MISSION CLOSEOUT & ARCHIVAL REPORT`}</span>
                 </div>
 
                 <h1 className="font-press-start text-base sm:text-xl text-emerald-300 tracking-wide">
@@ -2403,9 +2552,8 @@ export default function MoonMission({
                 </h1>
 
                 <p className="font-vt323 text-xl text-slate-200 leading-snug">
-                  Commander {playerName}, the Fission Surface Power &amp; Lunar Seismometer
-                  array is 100% online at the South Pole! Telemetry and polar core samples have
-                  been archived for future Artemis habitats.
+                  Commander {playerName}, all 4 {chosenSolutionDef.shortName} modules have been
+                  delivered and assembled by the Lunar Rover at the South Pole Outpost Station!
                 </p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-silkscreen text-xs">
@@ -2414,8 +2562,8 @@ export default function MoonMission({
                     <strong className="text-cyan-300">{chosenSolutionDef.shortName}</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
-                    <span className="text-slate-400 block text-[10px]">SAMPLES</span>
-                    <strong className="text-white">3 H2O / 3 HE-3</strong>
+                    <span className="text-slate-400 block text-[10px]">MODULES BUILT</span>
+                    <strong className="text-white">4 / 4 ONLINE</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
                     <span className="text-slate-400 block text-[10px]">SCORE</span>
