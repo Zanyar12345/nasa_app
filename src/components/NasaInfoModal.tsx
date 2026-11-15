@@ -9,26 +9,18 @@ export interface NasaPhotoInfo {
   telescopes: string[];
   credit: string;
   flickrUrl: string;
-  descriptionTr: string;
   descriptionEn: string;
   wavelengthGuide: {
     color: string;
-    instrumentTr: string;
     instrumentEn: string;
-    detailsTr: string;
     detailsEn: string;
   }[];
   details: {
-    labelTr: string;
     labelEn: string;
     value: string;
   }[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OFFICIAL NASA SCIENTIFIC DATA OBJECT
-// Easy to customize, update, or paste new NASA/Webb captions and URLs.
-// ─────────────────────────────────────────────────────────────────────────────
 export const NASA_PHOTO_INFO: NasaPhotoInfo = {
   title: "Spiral Galaxy NGC 4258 (Messier 106)",
   catalogId: "NGC 4258 • Messier 106",
@@ -40,48 +32,39 @@ export const NASA_PHOTO_INFO: NasaPhotoInfo = {
   credit: "NASA, ESA, CSA, STScI, CXC (Chandra X-ray Center)",
   flickrUrl:
     "https://www.flickr.com/photos/nasawebbtelescope/55487966583/in/album-72177720331299130/",
-  descriptionTr:
-    "NGC 4258 (Messier 106), Dünya'dan yaklaşık 23.5 milyon ışık yılı uzaklıkta, Canes Venatici (Av Köpekleri) takımyıldızında yer alan görkemli bir sarmal galaksidir. Bu görüntü; James Webb Uzay Teleskobu'nun (JWST) kızılötesi derinliği, Chandra'nın X-ışını verisi ve Hubble'ın optik netliğini birleştiren çok dalga boylu bir NASA kompozitidir. Galaksinin merkezindeki devasa süper kütleli kara delik, olağanüstü güçte yüksek enerjili parçacık jetleri püskürterek ana galaksi diskini kesen ünlü 'anormal sarmal kolları' (mor ve pembe şok cepheleri) meydana getirmektedir.",
   descriptionEn:
     "NGC 4258 (Messier 106) is a famous spiral galaxy located approximately 23.5 million light-years away in the constellation Canes Venatici. This multi-wavelength composite brings together infrared imagery from NASA's James Webb Space Telescope (JWST), X-rays from NASA's Chandra X-ray Observatory, and visible light from the Hubble Space Telescope. Powerful particle jets blasting from the central supermassive black hole interact with interstellar gas, producing the galaxy's famous 'anomalous arms'—extra spiral arms blazing in vibrant purple and pink shock waves.",
   wavelengthGuide: [
     {
       color: "bg-purple-500",
-      instrumentTr: "Chandra X-Işını (Mor & Mavi)",
       instrumentEn: "Chandra X-rays (Purple & Blue)",
-      detailsTr: "Merkezdeki süper kütleli kara deliğin püskürttüğü milyonlarca derecelik sıcak gaz ve şok dalgaları.",
       detailsEn: "Multi-million-degree hot gas and shock waves blasted out by the central supermassive black hole.",
     },
     {
       color: "bg-pink-500",
-      instrumentTr: "Webb Kızılötesi (Kırmızı & Pembe)",
       instrumentEn: "Webb Infrared (Red & Pink)",
-      detailsTr: "Yoğun kozmik toz bulutlarının ardındaki yeni doğan yıldızlar ve ısınan moleküler hidrojen gazı.",
       detailsEn: "Star-forming nurseries and warm molecular gas piercing through dense cosmic dust lanes.",
     },
     {
       color: "bg-sky-400",
-      instrumentTr: "Hubble Optik (Sarı & Mavi)",
       instrumentEn: "Hubble Optical (Yellow & Blue)",
-      detailsTr: "Galaksinin ana sarmal kollarındaki milyarlarca olgun yıldız ve parlak yıldız kümeleri.",
       detailsEn: "Billions of stellar populations and bright star clusters tracing the primary spiral disc.",
     },
   ],
   details: [
-    { labelTr: "Gök Cismi Tipi", labelEn: "Object Type", value: "Sarmal Galaksi (SABbc Spiral)" },
-    { labelTr: "Uzaklık", labelEn: "Distance", value: "~23.5 Milyon Işık Yılı (Mly)" },
-    { labelTr: "Takımyıldız", labelEn: "Constellation", value: "Canes Venatici (Av Köpekleri)" },
-    { labelTr: "Gözlem Dalga Boyu", labelEn: "Wavelengths", value: "X-Işını, Kızılötesi, Görünür Işık" },
+    { labelEn: "Object Type", value: "Spiral Galaxy (SABbc Spiral)" },
+    { labelEn: "Distance", value: "~23.5 Million Light-Years (Mly)" },
+    { labelEn: "Constellation", value: "Canes Venatici" },
+    { labelEn: "Wavelengths", value: "X-ray, Infrared, Visible Light" },
   ],
 };
 
 interface NasaInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lang?: "tr" | "en";
 }
 
-export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfoModalProps) {
+export default function NasaInfoModal({ isOpen, onClose }: NasaInfoModalProps) {
   // Close on Escape key press
   useEffect(() => {
     if (!isOpen) return;
@@ -123,7 +106,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
           <button
             onClick={onClose}
             className="p-2 rounded-none bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white transition-colors cursor-pointer shadow-[3px_3px_0px_#000] arcade-btn"
-            aria-label="Kapat / Close"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -133,10 +116,10 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
         <div className="space-y-2">
           <h3 className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Info className="w-3.5 h-3.5 text-sky-400" />
-            <span>{lang === "tr" ? "Bilimsel Açıklama" : "Scientific Overview"}</span>
+            <span>Scientific Overview</span>
           </h3>
           <p className="text-base sm:text-lg font-vt323 text-slate-300 leading-relaxed tracking-wide">
-            {lang === "tr" ? NASA_PHOTO_INFO.descriptionTr : NASA_PHOTO_INFO.descriptionEn}
+            {NASA_PHOTO_INFO.descriptionEn}
           </p>
         </div>
 
@@ -144,9 +127,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
         <div className="space-y-2.5">
           <h3 className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>
-              {lang === "tr" ? "Dalga Boyu & Gözlemevi Renk Rehberi" : "Multi-Wavelength Telescope Color Map"}
-            </span>
+            <span>Multi-Wavelength Telescope Color Map</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {NASA_PHOTO_INFO.wavelengthGuide.map((item, idx) => (
@@ -157,11 +138,11 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-none ${item.color} shadow-sm shrink-0`} />
                   <span className="text-[11px] font-silkscreen font-bold text-white leading-tight">
-                    {lang === "tr" ? item.instrumentTr : item.instrumentEn}
+                    {item.instrumentEn}
                   </span>
                 </div>
                 <p className="text-sm font-vt323 text-slate-400 leading-snug">
-                  {lang === "tr" ? item.detailsTr : item.detailsEn}
+                  {item.detailsEn}
                 </p>
               </div>
             ))}
@@ -172,7 +153,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
         <div className="space-y-2">
           <h3 className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Orbit className="w-3.5 h-3.5 text-indigo-400" />
-            <span>{lang === "tr" ? "Gözlem Verileri" : "Observation Telemetry"}</span>
+            <span>Observation Telemetry</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {NASA_PHOTO_INFO.details.map((detail, idx) => (
@@ -181,7 +162,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
                 className="p-2.5 rounded-none bg-slate-900/80 border border-slate-700 text-left shadow-[2px_2px_0px_#000]"
               >
                 <span className="text-[10px] font-silkscreen text-slate-400 uppercase block">
-                  {lang === "tr" ? detail.labelTr : detail.labelEn}
+                  {detail.labelEn}
                 </span>
                 <span className="text-xs font-silkscreen font-bold text-slate-200 block truncate">
                   {detail.value}
@@ -195,7 +176,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
         <div className="p-3.5 rounded-none bg-blue-950/40 border-2 border-blue-800/60 text-xs text-slate-300 space-y-1 shadow-[3px_3px_0px_#000]">
           <div className="flex items-center gap-2 text-blue-400 font-bold font-silkscreen">
             <Radio className="w-3.5 h-3.5" />
-            <span>{lang === "tr" ? "Gözlemevleri & Telif" : "Observatories & Credits"}</span>
+            <span>Observatories & Credits</span>
           </div>
           <p className="text-xs font-silkscreen text-slate-300">
             {NASA_PHOTO_INFO.telescopes.join(" • ")}
@@ -208,9 +189,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
         {/* Action Button: Official NASA Flickr Source Link */}
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t-2 border-slate-800 font-silkscreen">
           <span className="text-[10px] text-slate-400 text-center sm:text-left">
-            {lang === "tr"
-              ? "NASA James Webb Resmi Flickr Arşivine yönlendirilir"
-              : "Direct link to official NASA JWST Flickr Archive"}
+            Direct link to official NASA JWST Flickr Archive
           </span>
 
           <a
@@ -219,7 +198,7 @@ export default function NasaInfoModal({ isOpen, onClose, lang = "tr" }: NasaInfo
             rel="noopener noreferrer"
             className="w-full sm:w-auto px-5 py-2.5 rounded-none bg-blue-600 hover:bg-blue-500 border-2 border-blue-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000] transition-all cursor-pointer arcade-btn"
           >
-            <span>{lang === "tr" ? "Resmi NASA Kaynağını Görüntüle" : "View Official NASA Source"}</span>
+            <span>View Official NASA Source</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>

@@ -5,8 +5,6 @@ import Image from "next/image";
 import {
   Volume2,
   VolumeX,
-  Globe,
-  Sparkles,
   ChevronRight,
   Telescope,
   User,
@@ -25,8 +23,6 @@ import SciFiHudButton from "./SciFiHudButton";
 interface LandingScreenProps {
   onStartSolo: (playerName: string) => void;
   onStartCoop: (playerName: string) => void;
-  lang: "tr" | "en";
-  onLangChange: (lang: "tr" | "en") => void;
   soundOn: boolean;
   onToggleSound: () => void;
 }
@@ -34,8 +30,6 @@ interface LandingScreenProps {
 export default function LandingScreen({
   onStartSolo,
   onStartCoop,
-  lang,
-  onLangChange,
   soundOn,
   onToggleSound,
 }: LandingScreenProps) {
@@ -94,11 +88,7 @@ export default function LandingScreen({
     const trimmed = playerName.trim();
     if (trimmed.length < 2) {
       sounds.playAlarm();
-      setNameError(
-        lang === "tr"
-          ? "Lütfen en az 2 karakterlik bir telsiz adı girin."
-          : "Please enter a callsign with at least 2 characters."
-      );
+      setNameError("Please enter a callsign with at least 2 characters.");
       return;
     }
     sounds.playLaunchChord();
@@ -109,11 +99,7 @@ export default function LandingScreen({
     const trimmed = playerName.trim();
     if (trimmed.length < 2) {
       sounds.playAlarm();
-      setNameError(
-        lang === "tr"
-          ? "Lütfen en az 2 karakterlik bir telsiz adı girin."
-          : "Please enter a callsign with at least 2 characters."
-      );
+      setNameError("Please enter a callsign with at least 2 characters.");
       return;
     }
     sounds.playBlip(680);
@@ -143,12 +129,6 @@ export default function LandingScreen({
   const handleCloseInfo = () => {
     sounds.playClick(440);
     setIsInfoModalOpen(false);
-  };
-
-  const toggleLanguage = () => {
-    const nextLang = lang === "tr" ? "en" : "tr";
-    sounds.playBlip(640);
-    onLangChange(nextLang);
   };
 
   const isNameValid = playerName.trim().length >= 2;
@@ -204,23 +184,12 @@ export default function LandingScreen({
           </div>
         </div>
 
-        {/* Right: Language & Sound Toggles */}
+        {/* Right: Sound Toggle (Language Switcher Removed - English Locked) */}
         <div className="flex items-center gap-2.5">
-          {/* Language Switch */}
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-none sm:rounded-sm bg-slate-950/90 hover:bg-slate-800 border-2 border-white/30 text-slate-200 text-xs font-silkscreen font-bold backdrop-blur-md shadow-[3px_3px_0px_#000] transition-all cursor-pointer arcade-btn"
-            title="Dili Değiştir / Switch Language"
-          >
-            <Globe className="w-3.5 h-3.5 text-sky-400" />
-            <span>{lang.toUpperCase()}</span>
-          </button>
-
-          {/* Sound Toggle */}
           <button
             onClick={onToggleSound}
             className="p-2 rounded-none sm:rounded-sm bg-slate-950/90 hover:bg-slate-800 border-2 border-white/30 text-slate-200 text-xs backdrop-blur-md shadow-[3px_3px_0px_#000] transition-all cursor-pointer arcade-btn"
-            title={soundOn ? "Sesi Kapat / Mute" : "Sesi Aç / Unmute"}
+            title={soundOn ? "Mute SFX" : "Unmute SFX"}
           >
             {soundOn ? (
               <Volume2 className="w-4 h-4 text-emerald-400" />
@@ -237,24 +206,8 @@ export default function LandingScreen({
       <div className="relative z-20 w-full h-[calc(100vh-80px)] flex flex-col lg:flex-row items-center justify-between px-6 sm:px-12 lg:px-16 pointer-events-none">
         {/* ── LEFT SIDE: VERTICALLY CENTERED PROMINENT CHARACTER SPRITE ── */}
         <div className="w-full lg:w-1/2 h-full flex flex-col items-center justify-center relative pointer-events-none my-auto">
-          {/* Subtle Ambient Pilot Callout Tag */}
-          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 mb-3 rounded-none sm:rounded-sm bg-slate-950/90 border-2 border-sky-400/80 backdrop-blur-md shadow-[3px_3px_0px_#000] text-[11px] font-silkscreen text-sky-300 pointer-events-auto">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-none bg-sky-400 opacity-75" />
-              <span className="relative inline-flex rounded-none h-2 w-2 bg-sky-500" />
-            </span>
-            <span className="font-bold tracking-wider">
-              {playerName.trim() ? playerName.trim().toUpperCase() : "COMMANDER NOVA"}
-            </span>
-            <span className="text-slate-500">•</span>
-            <span className="text-slate-400">
-              {lang === "tr" ? "Baş Mühendis" : "Lead Engineer"}
-            </span>
-          </div>
-
           {/* Character Sprite Container with Idle Breathing Float and Ambient Rim Glow */}
           <div className="relative animate-idle-float flex items-center justify-center">
-            {/* Ambient Cyan Rim Glow radiating from behind the character */}
             <div className="absolute -inset-6 bg-gradient-to-t from-sky-500/25 via-blue-500/15 to-transparent blur-3xl rounded-none pointer-events-none" />
 
             {/* Standard <img> with strict natural aspect ratio & sharp pixelated rendering */}
@@ -280,25 +233,12 @@ export default function LandingScreen({
           {/* VIEW 1: INITIAL TITLE & PRIMARY CONTROLS */}
           {panelView === "title" && (
             <div className="w-full max-w-xl flex flex-col items-center lg:items-end space-y-6 animate-in fade-in duration-300">
-              {/* Mission Category Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none sm:rounded-sm bg-slate-950/90 border-2 border-sky-400/60 backdrop-blur-md text-sky-300 text-xs font-silkscreen font-bold tracking-wider uppercase shadow-[3px_3px_0px_#000]">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>16-BIT RETRO SPACE MISSION ARCADE</span>
-              </div>
-
               {/* Retro Arcade Game Title */}
-              <div className="space-y-3">
+              <div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-wider text-white leading-tight font-press-start drop-shadow-[4px_4px_0px_#000]">
                   <span className="block text-sky-400">ASTRO</span>
                   <span className="block text-amber-300">ARCADE</span>
                 </h1>
-
-                {/* Subtitle / Premise */}
-                <p className="text-sm sm:text-base text-slate-300 font-pixel max-w-md leading-relaxed drop-shadow-[2px_2px_0px_#000] text-xs sm:text-sm">
-                  {lang === "tr"
-                    ? "NASA derin uzay istasyonları, Mars ve Ay yörüngesinde 16-bit retro arcade keşif simülasyonu!"
-                    : "16-bit retro arcade space exploration simulation across NASA ISS, Mars, and lunar orbits!"}
-                </p>
               </div>
 
               {/* Action Buttons Column: Prominent START Button + Distanced INFO on the Right */}
@@ -313,24 +253,20 @@ export default function LandingScreen({
                     size="lg"
                     className="w-full"
                   >
-                    <span>
-                      {lang === "tr" ? "GÖREVE BAŞLA" : "START JOURNEY"}
-                    </span>
+                    <span>START JOURNEY</span>
                   </SciFiHudButton>
                 </div>
 
-                {/* 2. NASA PHOTO INFO BUTTON: Below START button with generous separation (not close) and on the right */}
+                {/* 2. NASA PHOTO INFO BUTTON: Below START button with generous separation and on the right */}
                 <div className="w-full flex justify-center lg:justify-end pt-8 sm:pt-12">
                   <button
                     type="button"
                     onClick={handleOpenInfo}
                     className="px-4 py-2.5 rounded-none bg-slate-950/90 hover:bg-[#061e2e] border-2 border-sky-400/80 hover:border-sky-300 text-sky-200 hover:text-white font-silkscreen text-[11px] sm:text-xs tracking-wider shadow-[4px_4px_0px_#000] arcade-btn flex items-center gap-2 cursor-pointer backdrop-blur-md transition-all"
-                    title={lang === "tr" ? "NASA Uzay Fotoğrafı Bilgisi" : "NASA Space Photo Info"}
+                    title="NASA Space Photo Info"
                   >
                     <Telescope className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                    <span>
-                      {lang === "tr" ? "NASA FOTOĞRAF BİLGİSİ (INFO)" : "NASA PHOTO INFO"}
-                    </span>
+                    <span>NASA PHOTO INFO</span>
                   </button>
                 </div>
               </div>
@@ -339,32 +275,30 @@ export default function LandingScreen({
 
           {/* VIEW 2: POST-START PLAYER SETUP CARD */}
           {panelView === "setup" && (
-            <div className="w-full max-w-md bg-slate-950/95 text-slate-100 border-2 border-sky-400 rounded-none sm:rounded-sm p-6 sm:p-7 shadow-[8px_8px_0px_#000] backdrop-blur-xl space-y-5 animate-in fade-in duration-200 text-left">
+            <div className="w-full max-w-md bg-slate-950/95 text-slate-100 border-2 border-sky-400 rounded-none sm:rounded-sm p-5 sm:p-6 shadow-[8px_8px_0px_#000] backdrop-blur-xl space-y-3.5 animate-in fade-in duration-200 text-left">
               {/* Card Header */}
-              <div className="space-y-1.5 pb-3 border-b-2 border-slate-800">
+              <div className="space-y-1 pb-2.5 border-b-2 border-slate-800">
                 <div className="flex items-center gap-2 text-sky-400 text-xs font-silkscreen font-bold tracking-widest uppercase">
                   <Compass className="w-4 h-4 text-sky-400" />
-                  <span>{lang === "tr" ? "ASTRONOT KAYDI" : "ASTRONAUT REGISTRATION"}</span>
+                  <span>ASTRONAUT REGISTRATION</span>
                 </div>
                 <h3 className="text-base sm:text-lg font-press-start text-white tracking-tight">
-                  {lang === "tr" ? "GÖREVİ BAŞLAT" : "INITIALIZE MISSION"}
+                  INITIALIZE MISSION
                 </h3>
                 <p className="text-xs text-slate-400 font-pixel">
-                  {lang === "tr"
-                    ? "Telsiz çağrı kodunu (ismini) gir ve oyun modunu seç:"
-                    : "Enter your callsign and select your game mode:"}
+                  Enter your callsign and select your game mode:
                 </p>
               </div>
 
               {/* 1. Player Name Input with Random Callsign Generator */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <label className="text-xs font-silkscreen font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-sky-400" />
-                    {lang === "tr" ? "Astronot Adı / Callsign" : "Astronaut Callsign"}
+                    <span>Astronaut Callsign</span>
                   </span>
                   <span className="text-[10px] text-slate-400 font-normal">
-                    {lang === "tr" ? "En az 2 harf" : "Min. 2 chars"}
+                    Min. 2 chars
                   </span>
                 </label>
 
@@ -383,8 +317,8 @@ export default function LandingScreen({
                         }
                       }}
                       maxLength={18}
-                      placeholder={lang === "tr" ? "örn. Nova, Orion, Artemis" : "e.g. Nova, Orion, Artemis"}
-                      className={`w-full py-3 px-4 rounded-none bg-black/90 border-2 text-sm font-silkscreen font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-[3px_3px_0px_#000] ${
+                      placeholder="e.g. Nova, Orion, Artemis"
+                      className={`w-full py-2.5 px-3.5 rounded-none bg-black/90 border-2 text-sm font-silkscreen font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-[3px_3px_0px_#000] ${
                         nameError
                           ? "border-red-500 focus:border-red-400"
                           : "border-slate-700 focus:border-sky-400"
@@ -396,8 +330,8 @@ export default function LandingScreen({
                   <button
                     type="button"
                     onClick={handleRandomCallsign}
-                    title={lang === "tr" ? "Rastgele Çağrı Kodu Oluştur" : "Generate Random Callsign"}
-                    className="p-3 rounded-none bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 hover:border-sky-400 text-slate-300 hover:text-sky-300 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-[3px_3px_0px_#000] arcade-btn"
+                    title="Generate Random Callsign"
+                    className="p-2.5 rounded-none bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 hover:border-sky-400 text-slate-300 hover:text-sky-300 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-[3px_3px_0px_#000] arcade-btn"
                   >
                     <Dice5 className="w-5 h-5" />
                   </button>
@@ -410,64 +344,64 @@ export default function LandingScreen({
                 )}
               </div>
 
-              {/* 2. Prominent Mode Selection Buttons */}
-              <div className="space-y-3 pt-2">
-                <span className="text-[10px] font-press-start uppercase tracking-wider text-slate-400 block">
-                  {lang === "tr" ? "Oyun Modunu Seç:" : "Select Game Mode:"}
-                </span>
+              {/* 2. Prominent Mode Selection Buttons with Expanded Safe Spacing & Zero Collision */}
+              <div className="pt-2">
+                <div className="flex flex-col gap-7 sm:gap-8">
+                  {/* Mode Button 1: SINGLE PLAYER */}
+                  <div className="w-full">
+                    <SciFiHudButton
+                      onClick={handleSelectSolo}
+                      disabled={!isNameValid}
+                      theme="cyan"
+                      code="SOLO_01"
+                      systemStatus="MODE: SINGLE PLAYER"
+                      size="md"
+                      className="w-full py-2"
+                      showTelemetryBlock={false}
+                      showBottomStatus={false}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <User className="w-4 h-4 text-cyan-300 shrink-0" />
+                        <span>SINGLE PLAYER</span>
+                      </div>
+                    </SciFiHudButton>
+                  </div>
 
-                {/* Mode Button 1: SINGLE PLAYER */}
-                <div className="w-full">
-                  <SciFiHudButton
-                    onClick={handleSelectSolo}
-                    disabled={!isNameValid}
-                    theme="cyan"
-                    code="SOLO_01"
-                    systemStatus="MODE: SINGLE PLAYER"
-                    size="md"
-                    className="w-full"
-                    showTelemetryBlock={false}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <User className="w-4 h-4 text-cyan-300 shrink-0" />
-                      <span>{lang === "tr" ? "TEK KİŞİLİK" : "SINGLE PLAYER"}</span>
-                    </div>
-                  </SciFiHudButton>
-                </div>
-
-                {/* Mode Button 2: MULTIPLAYER */}
-                <div className="w-full pt-1">
-                  <SciFiHudButton
-                    onClick={handleSelectMultiplayer}
-                    disabled={!isNameValid}
-                    theme="cyan"
-                    code="COOP_02"
-                    systemStatus="MODE: MULTIPLAYER"
-                    size="md"
-                    className="w-full"
-                    showTelemetryBlock={false}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Users className="w-4 h-4 text-cyan-300 shrink-0" />
-                      <span>{lang === "tr" ? "ÇOK OYUNCULU" : "MULTIPLAYER"}</span>
-                    </div>
-                  </SciFiHudButton>
+                  {/* Mode Button 2: MULTIPLAYER */}
+                  <div className="w-full">
+                    <SciFiHudButton
+                      onClick={handleSelectMultiplayer}
+                      disabled={!isNameValid}
+                      theme="cyan"
+                      code="COOP_02"
+                      systemStatus="MODE: MULTIPLAYER"
+                      size="md"
+                      className="w-full py-2"
+                      showTelemetryBlock={false}
+                      showBottomStatus={false}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Users className="w-4 h-4 text-cyan-300 shrink-0" />
+                        <span>MULTIPLAYER</span>
+                      </div>
+                    </SciFiHudButton>
+                  </div>
                 </div>
               </div>
 
               {/* 3. Subtle Back Button to Return to Initial View */}
-              <div className="pt-2 border-t-2 border-slate-800 flex items-center justify-between font-silkscreen">
+              <div className="pt-2.5 border-t-2 border-slate-800 flex items-center justify-between font-silkscreen">
                 <button
                   type="button"
                   onClick={handleBackToTitle}
                   className="px-3 py-1.5 rounded-none text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer flex items-center gap-1.5 arcade-btn"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>{lang === "tr" ? "← Ana Ekrana Dön" : "← Back to Title"}</span>
+                  <span>← Back to Title</span>
                 </button>
 
                 <span className="text-[10px] text-slate-500">
-                  {lang === "tr" ? "Adım 1 / 2" : "Step 1 / 2"}
+                  Step 1 / 2
                 </span>
               </div>
             </div>
@@ -480,15 +414,13 @@ export default function LandingScreen({
               <div className="space-y-1.5 pb-3 border-b-2 border-slate-800">
                 <div className="flex items-center gap-2 text-indigo-400 text-xs font-silkscreen font-bold tracking-widest uppercase">
                   <Radio className="w-4 h-4 text-indigo-400" />
-                  <span>{lang === "tr" ? "MÜRETTEBAT LOBİSİ" : "CREW LOBBY"}</span>
+                  <span>CREW LOBBY</span>
                 </div>
                 <h3 className="text-base sm:text-lg font-press-start text-white tracking-tight">
-                  {lang === "tr" ? "ÇOK OYUNCULU ODA" : "CO-OP MISSION ROOM"}
+                  CO-OP MISSION ROOM
                 </h3>
                 <p className="text-xs text-slate-400 font-pixel">
-                  {lang === "tr"
-                    ? "Arkadaşlarınla bağlantı kurup rolleri paylaş:"
-                    : "Connect with your crew and assign mission roles:"}
+                  Connect with your crew and assign mission roles:
                 </p>
               </div>
 
@@ -506,7 +438,7 @@ export default function LandingScreen({
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  {lang === "tr" ? "Oda Oluştur" : "Host Room"}
+                  Host Room
                 </button>
                 <button
                   type="button"
@@ -514,13 +446,13 @@ export default function LandingScreen({
                     sounds.playClick(600);
                     setMultiplayerTab("join");
                   }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 rounded-none text-xs font-silkscreen font-bold transition-all cursor-pointer ${
                     multiplayerTab === "join"
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  {lang === "tr" ? "Odaya Katıl" : "Join Room"}
+                  Join Room
                 </button>
               </div>
 
@@ -530,7 +462,7 @@ export default function LandingScreen({
                   <div className="p-3.5 rounded-none bg-black border-2 border-slate-700 flex items-center justify-between shadow-[3px_3px_0px_#000]">
                     <div>
                       <span className="text-[10px] font-silkscreen text-slate-400 uppercase block">
-                        {lang === "tr" ? "Oda Kodu / Room Code" : "Room Code"}
+                        Room Code
                       </span>
                       <span className="text-base sm:text-lg font-press-start tracking-widest text-sky-400">
                         {roomCode}
@@ -545,14 +477,12 @@ export default function LandingScreen({
                       {copiedCode ? (
                         <>
                           <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">
-                            {lang === "tr" ? "KOPYALANDI" : "COPIED"}
-                          </span>
+                          <span className="text-emerald-400">COPIED</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{lang === "tr" ? "KOPYALA" : "COPY"}</span>
+                          <span>COPY</span>
                         </>
                       )}
                     </button>
@@ -561,14 +491,14 @@ export default function LandingScreen({
                   {/* Crew Slots */}
                   <div className="space-y-2">
                     <span className="text-[10px] font-silkscreen text-slate-400 uppercase block">
-                      {lang === "tr" ? "Mürettebat Listesi (1/4 Hazır):" : "Crew Roster (1/4 Ready):"}
+                      Crew Roster (1/4 Ready):
                     </span>
 
                     <div className="space-y-1.5 font-silkscreen text-xs">
                       <div className="p-2.5 rounded-none bg-indigo-950/60 border border-indigo-500/60 flex items-center justify-between">
                         <span className="font-bold text-white flex items-center gap-2">
                           <span>👑</span>
-                          <span>{playerName.trim() || "Commander"} (Sen)</span>
+                          <span>{playerName.trim() || "Commander"} (You)</span>
                         </span>
                         <span className="text-[9px] font-press-start text-emerald-400 bg-emerald-500/20 px-2 py-0.5 border border-emerald-500/40">
                           READY
@@ -576,12 +506,12 @@ export default function LandingScreen({
                       </div>
 
                       <div className="p-2.5 rounded-none bg-slate-950/60 border border-slate-800 flex items-center justify-between text-slate-400">
-                        <span>2. ISRU Madencilik Şefi</span>
+                        <span>2. ISRU Mining Specialist</span>
                         <span className="text-[9px] font-press-start text-slate-500">WAITING...</span>
                       </div>
 
                       <div className="p-2.5 rounded-none bg-slate-950/60 border border-slate-800 flex items-center justify-between text-slate-400">
-                        <span>3. Termal & Güç Operatörü</span>
+                        <span>3. Thermal & Power Operator</span>
                         <span className="text-[9px] font-press-start text-slate-500">WAITING...</span>
                       </div>
                     </div>
@@ -597,11 +527,7 @@ export default function LandingScreen({
                       size="md"
                       className="w-full"
                     >
-                      <span>
-                        {lang === "tr"
-                          ? "MÜRETTEBATI FIRLAT (BAŞLA)"
-                          : "LAUNCH WITH CREW"}
-                      </span>
+                      <span>LAUNCH WITH CREW</span>
                     </SciFiHudButton>
                   </div>
                 </div>
@@ -609,7 +535,7 @@ export default function LandingScreen({
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-xs font-silkscreen text-slate-400 uppercase block">
-                      {lang === "tr" ? "Katılmak İstediğin Oda Kodu:" : "Enter Room Code:"}
+                      Enter Room Code:
                     </label>
                     <input
                       type="text"
@@ -631,7 +557,7 @@ export default function LandingScreen({
                       className="w-full"
                       showTelemetryBlock={false}
                     >
-                      <span>{lang === "tr" ? "ODAYA BAĞLAN & BAŞLA" : "CONNECT & LAUNCH"}</span>
+                      <span>CONNECT & LAUNCH</span>
                       <ChevronRight className="w-4 h-4 shrink-0" />
                     </SciFiHudButton>
                   </div>
@@ -643,10 +569,10 @@ export default function LandingScreen({
                 <button
                   type="button"
                   onClick={handleBackToSetup}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-none text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer flex items-center gap-1.5 arcade-btn"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>{lang === "tr" ? "← Kuruluma Dön" : "← Back to Setup"}</span>
+                  <span>← Back to Setup</span>
                 </button>
               </div>
             </div>
@@ -660,7 +586,6 @@ export default function LandingScreen({
       <NasaInfoModal
         isOpen={isInfoModalOpen}
         onClose={handleCloseInfo}
-        lang={lang}
       />
     </main>
   );

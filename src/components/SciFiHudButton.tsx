@@ -13,6 +13,7 @@ interface SciFiHudButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   size?: "sm" | "md" | "lg";
   className?: string;
   showTelemetryBlock?: boolean;
+  showBottomStatus?: boolean;
 }
 
 const THEME_COLORS: Record<
@@ -73,6 +74,7 @@ export default function SciFiHudButton({
   size = "md",
   className = "",
   showTelemetryBlock = true,
+  showBottomStatus,
   disabled,
   onClick,
   onMouseEnter,
@@ -376,12 +378,14 @@ export default function SciFiHudButton({
       </span>
 
       {/* Bottom-Left Status: "SYSTEM: ACTIVE" */}
-      <span
-        className={`absolute -bottom-3.5 left-6 text-[8.5px] sm:text-[9.5px] font-hud-mono font-bold tracking-wider pointer-events-none transition-colors duration-300 ${colors.accentText}`}
-        style={{ opacity: isHovered ? 0.95 : 0.75 }}
-      >
-        {systemStatus}
-      </span>
+      {(showBottomStatus ?? showTelemetryBlock) && systemStatus && (
+        <span
+          className={`absolute -bottom-3.5 left-6 text-[8.5px] sm:text-[9.5px] font-hud-mono font-bold tracking-wider pointer-events-none transition-colors duration-300 ${colors.accentText}`}
+          style={{ opacity: isHovered ? 0.95 : 0.75 }}
+        >
+          {systemStatus}
+        </span>
+      )}
 
       {/* Bottom-Left Micro Technical Code Block */}
       {showTelemetryBlock && (
