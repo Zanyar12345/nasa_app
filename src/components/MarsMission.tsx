@@ -39,9 +39,23 @@ export type MarsMissionPhase =
   | MarsStageId
   | "SAMPLING_SITE_MAP"
   | "SAMPLING_SITE_VIEW"
+  | "PHASE_F_VICTORY"
   | "STAGE_GAME_READY";
 
 export type MarsSamplingSiteId = "rochette" | "wildcat" | "cheyava";
+
+export type MarsDirection = "UP" | "DOWN" | "LEFT" | "RIGHT";
+
+export interface MarsGridCell {
+  col: number;
+  row: number;
+}
+
+export type RoverExecutionStatus =
+  | "PLANNING"
+  | "DRIVING"
+  | "DRILLING"
+  | "COMPLETED";
 
 export interface MarsSamplingSiteConfig {
   id: MarsSamplingSiteId;
@@ -50,6 +64,10 @@ export interface MarsSamplingSiteConfig {
   code: string;
   geologyType: string;
   scientificSummary: string;
+  sampleName: string;
+  gridImage: string;
+  startCell: MarsGridCell;
+  targetCell: MarsGridCell;
   circleLeft: string;
   circleTop: string;
   circleWidth: string;
@@ -67,6 +85,10 @@ export const MARS_SAMPLING_SITES: MarsSamplingSiteConfig[] = [
     geologyType: "ANCIENT BASALTIC LAVA & SALT MINERALS",
     scientificSummary:
       "Basaltic crater floor outcrop bearing water-deposited salt minerals that preserve ancient Martian groundwater history.",
+    sampleName: "Montdenier / Montagnac Basalt Core",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.29.11 (2).jpg",
+    startCell: { col: 5, row: 3 },
+    targetCell: { col: 0, row: 0 },
     circleLeft: "19.6%",
     circleTop: "41.2%",
     circleWidth: "11.8%",
@@ -82,6 +104,10 @@ export const MARS_SAMPLING_SITES: MarsSamplingSiteConfig[] = [
     geologyType: "FINE-GRAINED SEDIMENTARY MUDSTONE",
     scientificSummary:
       "Ancient lakebed mudstone rich in organic-bearing sulfate and clay minerals formed as a prehistoric Martian river delta settled.",
+    sampleName: "Hazeltop / Bearwallow Organic Mudstone Core",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.29.11 (1).jpg",
+    startCell: { col: 7, row: 0 },
+    targetCell: { col: 1, row: 3 },
     circleLeft: "85.8%",
     circleTop: "42.8%",
     circleWidth: "11.6%",
@@ -97,6 +123,10 @@ export const MARS_SAMPLING_SITES: MarsSamplingSiteConfig[] = [
     geologyType: "RIVER CHANNEL VEINS & LEOPARD SPOTS",
     scientificSummary:
       "Ancient river valley rock featuring calcium sulfate veins and millimeter-scale 'leopard spots' linked to potential microbial chemistry.",
+    sampleName: "Sapphire Canyon Biosignature Core",
+    gridImage: "/images/WhatsApp Image 2026-11-15 at 15.29.11.jpg",
+    startCell: { col: 0, row: 3 },
+    targetCell: { col: 6, row: 1 },
     circleLeft: "64.0%",
     circleTop: "85.5%",
     circleWidth: "11.6%",
@@ -113,6 +143,8 @@ export interface MarsRoverSolution {
   slideNumber: number;
   title: string;
   shortName: string;
+  cardName: string;
+  specSummary: string;
   subtitle: string;
   pros: string[];
   cons: string[];
@@ -124,6 +156,8 @@ export const MARS_ROVER_SOLUTIONS: MarsRoverSolution[] = [
     slideNumber: 1,
     title: "SOLUTION 1: LOAD PERSEVERANCE",
     shortName: "PERSEVERANCE",
+    cardName: "Perseverance Rover",
+    specSummary: "SAMPLE-CACHING TURRET • SUPERCAM MAST • REINFORCED WHEELS",
     subtitle: "MARS 2020 SAMPLE CACHING ROVER // AUTONOMOUS CORING",
     pros: [
       "Seals rock cores",
@@ -141,6 +175,8 @@ export const MARS_ROVER_SOLUTIONS: MarsRoverSolution[] = [
     slideNumber: 2,
     title: "SOLUTION 2: LOAD CURIOSITY",
     shortName: "CURIOSITY",
+    cardName: "Curiosity Rover",
+    specSummary: "SAM ONBOARD LAB • CHEMCAM LASER MAST • MMRTG BATTERY",
     subtitle: "MARS SCIENCE LABORATORY // IN-SITU CHEMICAL ANALYSIS",
     pros: [
       "Onboard chemistry lab",
@@ -154,6 +190,102 @@ export const MARS_ROVER_SOLUTIONS: MarsRoverSolution[] = [
     ],
   },
 ];
+
+function MarsRoverPixelSprite({
+  roverId,
+  className = "w-20 h-16",
+}: {
+  roverId: MarsRoverSolutionId;
+  className?: string;
+}) {
+  if (roverId === "perseverance") {
+    return (
+      <svg
+        viewBox="0 0 36 28"
+        className={className}
+        style={{ imageRendering: "pixelated" }}
+        shapeRendering="crispEdges"
+      >
+        {/* Angled Rear MMRTG Power Source with Cooling Fins */}
+        <rect x="2" y="9" width="6" height="4" fill="#cbd5e1" />
+        <rect x="3" y="8" width="4" height="2" fill="#f8fafc" />
+        <rect x="1" y="10" width="2" height="2" fill="#f97316" />
+        {/* UHF Antenna */}
+        <rect x="8" y="6" width="2" height="6" fill="#64748b" />
+        <rect x="7" y="5" width="4" height="2" fill="#38bdf8" />
+        {/* Warm Electronics Box Chassis (White + Gold Thermal Foil) */}
+        <rect x="7" y="12" width="17" height="6" fill="#f8fafc" />
+        <rect x="8" y="13" width="15" height="4" fill="#e2e8f0" />
+        <rect x="10" y="14" width="6" height="2" fill="#f59e0b" />
+        <rect x="18" y="14" width="4" height="2" fill="#38bdf8" />
+        {/* SuperCam Mast & Cyclops Laser Eye */}
+        <rect x="20" y="4" width="3" height="8" fill="#cbd5e1" />
+        <rect x="18" y="2" width="7" height="4" fill="#f8fafc" />
+        <rect x="21" y="3" width="3" height="2" fill="#ef4444" />
+        <rect x="19" y="3" width="1" height="2" fill="#0f172a" />
+        {/* Articulated Sample-Caching Robotic Arm & Coring Turret */}
+        <rect x="24" y="13" width="6" height="2" fill="#94a3b8" />
+        <rect x="28" y="9" width="2" height="6" fill="#cbd5e1" />
+        <rect x="30" y="8" width="4" height="5" fill="#f59e0b" />
+        <rect x="34" y="10" width="2" height="2" fill="#22d3ee" />
+        {/* Rocker-Bogie Suspension Struts */}
+        <rect x="6" y="18" width="20" height="2" fill="#475569" />
+        <rect x="7" y="19" width="2" height="3" fill="#64748b" />
+        <rect x="15" y="19" width="2" height="3" fill="#64748b" />
+        <rect x="23" y="19" width="2" height="3" fill="#64748b" />
+        {/* 6 Reinforced Thick Titanium Cleated Wheels */}
+        <rect x="5" y="21" width="6" height="5" fill="#1e293b" />
+        <rect x="6" y="22" width="4" height="3" fill="#eab308" />
+        <rect x="13" y="21" width="6" height="5" fill="#1e293b" />
+        <rect x="14" y="22" width="4" height="3" fill="#eab308" />
+        <rect x="21" y="21" width="6" height="5" fill="#1e293b" />
+        <rect x="22" y="22" width="4" height="3" fill="#eab308" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 36 28"
+      className={className}
+      style={{ imageRendering: "pixelated" }}
+      shapeRendering="crispEdges"
+    >
+      {/* Rear MMRTG Nuclear Battery */}
+      <rect x="2" y="10" width="6" height="4" fill="#94a3b8" />
+      <rect x="1" y="11" width="2" height="2" fill="#22c55e" />
+      {/* SAM Onboard Chemistry Lab Intake Stacks */}
+      <rect x="10" y="8" width="3" height="4" fill="#f59e0b" />
+      <rect x="14" y="9" width="3" height="3" fill="#eab308" />
+      {/* Curiosity Lab Chassis */}
+      <rect x="7" y="12" width="17" height="6" fill="#e2e8f0" />
+      <rect x="8" y="13" width="15" height="4" fill="#cbd5e1" />
+      <rect x="9" y="14" width="8" height="2" fill="#10b981" />
+      <rect x="19" y="14" width="4" height="2" fill="#f59e0b" />
+      {/* ChemCam Long-Range Laser Mast */}
+      <rect x="20" y="4" width="2" height="8" fill="#94a3b8" />
+      <rect x="18" y="2" width="6" height="4" fill="#cbd5e1" />
+      <rect x="21" y="3" width="2" height="2" fill="#38bdf8" />
+      <rect x="24" y="3" width="6" height="1" fill="#f43f5e" />
+      {/* Front Drill Arm */}
+      <rect x="24" y="14" width="6" height="2" fill="#64748b" />
+      <rect x="29" y="12" width="4" height="4" fill="#94a3b8" />
+      <rect x="33" y="13" width="2" height="2" fill="#38bdf8" />
+      {/* Rocker-Bogie Suspension */}
+      <rect x="6" y="18" width="20" height="2" fill="#334155" />
+      <rect x="7" y="19" width="2" height="3" fill="#475569" />
+      <rect x="15" y="19" width="2" height="3" fill="#475569" />
+      <rect x="23" y="19" width="2" height="3" fill="#475569" />
+      {/* 6 Thin Aluminum Wheels */}
+      <rect x="5" y="21" width="6" height="5" fill="#0f172a" />
+      <rect x="6" y="22" width="4" height="3" fill="#94a3b8" />
+      <rect x="13" y="21" width="6" height="5" fill="#0f172a" />
+      <rect x="14" y="22" width="4" height="3" fill="#94a3b8" />
+      <rect x="21" y="21" width="6" height="5" fill="#0f172a" />
+      <rect x="22" y="22" width="4" height="3" fill="#94a3b8" />
+    </svg>
+  );
+}
 
 export interface MarsStageConfig {
   id: MarsStageId;
@@ -395,10 +527,21 @@ export default function MarsMission({
   const [solutionSlideIndex, setSolutionSlideIndex] = useState<number>(0);
   const [selectedRoverSolution, setSelectedRoverSolution] =
     useState<MarsRoverSolutionId>("perseverance");
+  const [loadedFairingRover, setLoadedFairingRover] =
+    useState<MarsRoverSolutionId | null>(null);
+  const [hoverRoverSlot, setHoverRoverSlot] = useState<boolean>(false);
+  const [roverFairingError, setRoverFairingError] = useState<string | null>(
+    null
+  );
   const [activeSamplingSite, setActiveSamplingSite] =
     useState<MarsSamplingSiteId | null>(null);
   const [hoveredSamplingSite, setHoveredSamplingSite] =
     useState<MarsSamplingSiteId | null>(null);
+  const [plannedMoves, setPlannedMoves] = useState<MarsDirection[]>([]);
+  const [roverExecStatus, setRoverExecStatus] =
+    useState<RoverExecutionStatus>("PLANNING");
+  const [roverStepIndex, setRoverStepIndex] = useState<number>(0);
+  const [sampledSites, setSampledSites] = useState<MarsSamplingSiteId[]>([]);
   const [loadProgress, setLoadProgress] = useState<number>(0);
   const [autoAdvance, setAutoAdvance] = useState<boolean>(true);
   const [typewriterIndex, setTypewriterIndex] = useState<number>(0);
@@ -421,9 +564,55 @@ export default function MarsMission({
   const chosenRoverDef =
     MARS_ROVER_SOLUTIONS.find((s) => s.id === selectedRoverSolution) ||
     MARS_ROVER_SOLUTIONS[0];
+  const loadedRoverDef = loadedFairingRover
+    ? MARS_ROVER_SOLUTIONS.find((s) => s.id === loadedFairingRover) || null
+    : null;
+  const isLoadedRoverMismatched =
+    loadedFairingRover !== null && loadedFairingRover !== selectedRoverSolution;
+  const isRoverFairingReadyToLaunch =
+    loadedFairingRover !== null && loadedFairingRover === selectedRoverSolution;
+
   const activeSamplingSiteDef =
     MARS_SAMPLING_SITES.find((s) => s.id === activeSamplingSite) ||
     MARS_SAMPLING_SITES[0];
+
+  // Compute simulated 8x4 grid path cells from startCell + plannedMoves
+  const plannedPathCells: MarsGridCell[] = React.useMemo(() => {
+    const cells: MarsGridCell[] = [activeSamplingSiteDef.startCell];
+    for (const dir of plannedMoves) {
+      const prev = cells[cells.length - 1];
+      let nextCol = prev.col;
+      let nextRow = prev.row;
+      if (dir === "UP") nextRow -= 1;
+      else if (dir === "DOWN") nextRow += 1;
+      else if (dir === "LEFT") nextCol -= 1;
+      else if (dir === "RIGHT") nextCol += 1;
+      nextCol = Math.max(0, Math.min(7, nextCol));
+      nextRow = Math.max(0, Math.min(3, nextRow));
+      cells.push({ col: nextCol, row: nextRow });
+    }
+    return cells;
+  }, [activeSamplingSiteDef.startCell, plannedMoves]);
+
+  const simTipCell =
+    plannedPathCells[plannedPathCells.length - 1] ||
+    activeSamplingSiteDef.startCell;
+
+  const isTargetReachedInSim =
+    simTipCell.col === activeSamplingSiteDef.targetCell.col &&
+    simTipCell.row === activeSamplingSiteDef.targetCell.row;
+
+  const currentRoverCell =
+    roverExecStatus === "PLANNING"
+      ? activeSamplingSiteDef.startCell
+      : plannedPathCells[
+          Math.min(roverStepIndex, plannedPathCells.length - 1)
+        ] || activeSamplingSiteDef.startCell;
+
+  const currentRoverHeading: MarsDirection =
+    roverExecStatus === "PLANNING"
+      ? plannedMoves[0] || "RIGHT"
+      : plannedMoves[Math.max(0, roverStepIndex - 1)] || "RIGHT";
 
   const currentStage = MARS_STAGES.find((s) => s.id === phase) || null;
   const activeText =
@@ -439,7 +628,7 @@ export default function MarsMission({
     setBriefingPage(0);
     setTypewriterIndex(0);
     setLoadProgress(0);
-    if (nextPhase === "STAGE_7") {
+    if (nextPhase === "STAGE_7" || nextPhase === "PHASE_F_VICTORY") {
       sfx.playVictoryFanfare();
     } else if (nextPhase !== "BRIEFING_INTRO") {
       sfx.playStageTransition();
@@ -459,18 +648,175 @@ export default function MarsMission({
     const chosen =
       MARS_ROVER_SOLUTIONS[solutionSlideIndex] || MARS_ROVER_SOLUTIONS[0];
     setSelectedRoverSolution(chosen.id);
+    setLoadedFairingRover(null);
+    setRoverFairingError(null);
+    sfx.playStageTransition();
+    transitionToPhase("PHASE_BC_ROVER");
+  }, [solutionSlideIndex, transitionToPhase]);
+
+  const handleLoadRoverIntoFairing = useCallback(
+    (roverId: MarsRoverSolutionId) => {
+      setRoverFairingError(null);
+      if (loadedFairingRover === roverId) {
+        setLoadedFairingRover(null);
+        sfx.playClick(480);
+        return;
+      }
+      setLoadedFairingRover(roverId);
+      if (roverId === selectedRoverSolution) {
+        sfx.playStageTransition();
+      } else {
+        sfx.playClick(320);
+      }
+    },
+    [loadedFairingRover, selectedRoverSolution]
+  );
+
+  const handleRemoveRoverFromFairing = useCallback(() => {
+    if (!loadedFairingRover) return;
+    setLoadedFairingRover(null);
+    setRoverFairingError(null);
+    sfx.playClick(480);
+  }, [loadedFairingRover]);
+
+  const handleLaunchFromRoverFairing = useCallback(() => {
+    if (!loadedFairingRover) {
+      sfx.playClick(300);
+      setRoverFairingError("LOAD A ROVER INTO THE CENTRAL PAYLOAD BAY FIRST!");
+      return;
+    }
+    if (loadedFairingRover !== selectedRoverSolution) {
+      sfx.playClick(280);
+      setRoverFairingError(
+        "MISMATCHED ROVER — LOAD THE ROVER SELECTED IN PHASE A"
+      );
+      return;
+    }
+    setRoverFairingError(null);
     sfx.playStageTransition();
     transitionToPhase("STAGE_1");
-  }, [solutionSlideIndex, transitionToPhase]);
+  }, [loadedFairingRover, selectedRoverSolution, transitionToPhase]);
 
   const handleSelectSamplingSite = useCallback(
     (siteId: MarsSamplingSiteId) => {
       setActiveSamplingSite(siteId);
+      setPlannedMoves([]);
+      setRoverExecStatus("PLANNING");
+      setRoverStepIndex(0);
       sfx.playStageTransition();
       transitionToPhase("SAMPLING_SITE_VIEW");
     },
     [transitionToPhase]
   );
+
+  const handleQueueMove = useCallback(
+    (dir: MarsDirection) => {
+      if (roverExecStatus !== "PLANNING") return;
+      if (plannedMoves.length >= 24) {
+        sfx.playClick(280);
+        return;
+      }
+      let nextCol = simTipCell.col;
+      let nextRow = simTipCell.row;
+      if (dir === "UP") nextRow -= 1;
+      else if (dir === "DOWN") nextRow += 1;
+      else if (dir === "LEFT") nextCol -= 1;
+      else if (dir === "RIGHT") nextCol += 1;
+
+      if (nextCol < 0 || nextCol > 7 || nextRow < 0 || nextRow > 3) {
+        sfx.playClick(260);
+        return;
+      }
+
+      // If stepping directly back onto the previous cell, pop the last move (clean undo)
+      if (plannedPathCells.length >= 2) {
+        const prevCell = plannedPathCells[plannedPathCells.length - 2];
+        if (prevCell.col === nextCol && prevCell.row === nextRow) {
+          setPlannedMoves((prev) => prev.slice(0, -1));
+          sfx.playClick(520);
+          return;
+        }
+      }
+
+      setPlannedMoves((prev) => [...prev, dir]);
+      if (
+        nextCol === activeSamplingSiteDef.targetCell.col &&
+        nextRow === activeSamplingSiteDef.targetCell.row
+      ) {
+        sfx.playStageTransition();
+      } else {
+        sfx.playBlip(640 + plannedMoves.length * 25);
+      }
+    },
+    [
+      roverExecStatus,
+      plannedMoves.length,
+      simTipCell,
+      plannedPathCells,
+      activeSamplingSiteDef.targetCell,
+    ]
+  );
+
+  const handleUndoMove = useCallback(() => {
+    if (roverExecStatus !== "PLANNING" || plannedMoves.length === 0) return;
+    setPlannedMoves((prev) => prev.slice(0, -1));
+    sfx.playClick(500);
+  }, [roverExecStatus, plannedMoves.length]);
+
+  const handleClearMoves = useCallback(() => {
+    if (roverExecStatus !== "PLANNING") return;
+    setPlannedMoves([]);
+    setRoverStepIndex(0);
+    sfx.playClick(440);
+  }, [roverExecStatus]);
+
+  const handleExecuteRoverPath = useCallback(() => {
+    if (roverExecStatus !== "PLANNING" || !isTargetReachedInSim) {
+      sfx.playClick(300);
+      return;
+    }
+    sfx.playStageTransition();
+    setRoverStepIndex(0);
+    setRoverExecStatus("DRIVING");
+  }, [roverExecStatus, isTargetReachedInSim]);
+
+  // Step-by-step animated Rover drive along plannedPathCells -> DRILLING -> COMPLETED
+  useEffect(() => {
+    if (phase !== "SAMPLING_SITE_VIEW") return;
+
+    if (roverExecStatus === "DRIVING") {
+      const totalSteps = plannedPathCells.length - 1;
+      const timer = setTimeout(() => {
+        if (roverStepIndex < totalSteps) {
+          sfx.playClick(460 + (roverStepIndex % 4) * 55);
+          setRoverStepIndex((prev) => prev + 1);
+        } else {
+          sfx.playStageTransition();
+          setRoverExecStatus("DRILLING");
+        }
+      }, 360);
+      return () => clearTimeout(timer);
+    }
+
+    if (roverExecStatus === "DRILLING") {
+      const drillTimer = setTimeout(() => {
+        sfx.playVictoryFanfare();
+        setRoverExecStatus("COMPLETED");
+        setSampledSites((prev) =>
+          prev.includes(activeSamplingSiteDef.id)
+            ? prev
+            : [...prev, activeSamplingSiteDef.id]
+        );
+      }, 1500);
+      return () => clearTimeout(drillTimer);
+    }
+  }, [
+    phase,
+    roverExecStatus,
+    roverStepIndex,
+    plannedPathCells.length,
+    activeSamplingSiteDef.id,
+  ]);
 
   // Typewriter effect with 8-bit voice blips
   useEffect(() => {
@@ -502,6 +848,10 @@ export default function MarsMission({
       handleSelectSolution();
       return;
     }
+    if (phase === "PHASE_BC_ROVER") {
+      handleLaunchFromRoverFairing();
+      return;
+    }
     if (phase === "STAGE_7") {
       transitionToPhase("SAMPLING_SITE_MAP");
       return;
@@ -516,11 +866,16 @@ export default function MarsMission({
     introBriefingPages.length,
     transitionToPhase,
     handleSelectSolution,
+    handleLaunchFromRoverFairing,
   ]);
 
   // Go back to previous stage
   const handlePrevStage = useCallback(() => {
     sfx.playClick(580);
+    if (phase === "PHASE_F_VICTORY") {
+      transitionToPhase("SAMPLING_SITE_MAP");
+      return;
+    }
     if (phase === "SAMPLING_SITE_VIEW") {
       transitionToPhase("SAMPLING_SITE_MAP");
       return;
@@ -529,9 +884,13 @@ export default function MarsMission({
       transitionToPhase("STAGE_7");
       return;
     }
+    if (phase === "PHASE_BC_ROVER") {
+      transitionToPhase("PHASE_A_SOLUTIONS");
+      return;
+    }
     const idx = MARS_STAGES.findIndex((s) => s.id === phase);
     if (idx === 0) {
-      transitionToPhase("PHASE_A_SOLUTIONS");
+      transitionToPhase("PHASE_BC_ROVER");
     } else if (idx > 0) {
       transitionToPhase(MARS_STAGES[idx - 1].id);
     }
@@ -542,9 +901,11 @@ export default function MarsMission({
     if (
       phase === "BRIEFING_INTRO" ||
       phase === "PHASE_A_SOLUTIONS" ||
+      phase === "PHASE_BC_ROVER" ||
       phase === "STAGE_7" ||
       phase === "SAMPLING_SITE_MAP" ||
       phase === "SAMPLING_SITE_VIEW" ||
+      phase === "PHASE_F_VICTORY" ||
       phase === "STAGE_GAME_READY"
     )
       return;
@@ -571,9 +932,11 @@ export default function MarsMission({
     if (
       phase === "BRIEFING_INTRO" ||
       phase === "PHASE_A_SOLUTIONS" ||
+      phase === "PHASE_BC_ROVER" ||
       phase === "STAGE_7" ||
       phase === "SAMPLING_SITE_MAP" ||
       phase === "SAMPLING_SITE_VIEW" ||
+      phase === "PHASE_F_VICTORY" ||
       phase === "STAGE_GAME_READY" ||
       !autoAdvance ||
       loadProgress < 100 ||
@@ -594,7 +957,7 @@ export default function MarsMission({
     transitionToPhase,
   ]);
 
-  // Keyboard navigation (Space / Enter / Right Arrow to advance, Left Arrow to go back)
+  // Keyboard navigation (Space / Enter / Right Arrow to advance, Left Arrow to go back, WASD in grid)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (phase === "PHASE_A_SOLUTIONS") {
@@ -607,6 +970,22 @@ export default function MarsMission({
         } else if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleSelectSolution();
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
+      if (phase === "PHASE_BC_ROVER") {
+        if (e.key === "1") {
+          handleLoadRoverIntoFairing("perseverance");
+        } else if (e.key === "2") {
+          handleLoadRoverIntoFairing("curiosity");
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          handleLaunchFromRoverFairing();
+        } else if (e.key === "ArrowLeft") {
+          handlePrevStage();
         } else if (e.key === "Escape") {
           onAbort();
         }
@@ -629,10 +1008,34 @@ export default function MarsMission({
       }
 
       if (phase === "SAMPLING_SITE_VIEW") {
-        if (e.key === "ArrowLeft" || e.key === "Backspace") {
-          handlePrevStage();
+        const keyLower = e.key.toLowerCase();
+        if (keyLower === "w" || e.key === "ArrowUp") {
+          e.preventDefault();
+          handleQueueMove("UP");
+        } else if (keyLower === "s" || e.key === "ArrowDown") {
+          e.preventDefault();
+          handleQueueMove("DOWN");
+        } else if (keyLower === "a" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleQueueMove("LEFT");
+        } else if (keyLower === "d" || e.key === "ArrowRight") {
+          e.preventDefault();
+          handleQueueMove("RIGHT");
+        } else if (e.key === "Backspace") {
+          e.preventDefault();
+          handleUndoMove();
+        } else if (keyLower === "c") {
+          e.preventDefault();
+          handleClearMoves();
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (roverExecStatus === "PLANNING" && isTargetReachedInSim) {
+            handleExecuteRoverPath();
+          } else if (roverExecStatus === "COMPLETED") {
+            transitionToPhase("SAMPLING_SITE_MAP");
+          }
         } else if (e.key === "Escape") {
-          onAbort();
+          transitionToPhase("SAMPLING_SITE_MAP");
         }
         return;
       }
@@ -658,11 +1061,20 @@ export default function MarsMission({
     isTypewriterDone,
     activeText.length,
     phase,
+    roverExecStatus,
+    isTargetReachedInSim,
     handleNextStage,
     handlePrevStage,
     handleToggleSolutionSlide,
     handleSelectSolution,
+    handleLoadRoverIntoFairing,
+    handleLaunchFromRoverFairing,
     handleSelectSamplingSite,
+    handleQueueMove,
+    handleUndoMove,
+    handleClearMoves,
+    handleExecuteRoverPath,
+    transitionToPhase,
     onAbort,
   ]);
 
@@ -804,6 +1216,7 @@ export default function MarsMission({
         <div className="flex items-center gap-2">
           {phase !== "BRIEFING_INTRO" &&
             phase !== "PHASE_A_SOLUTIONS" &&
+            phase !== "PHASE_BC_ROVER" &&
             phase !== "STAGE_7" &&
             phase !== "SAMPLING_SITE_MAP" &&
             phase !== "SAMPLING_SITE_VIEW" &&
@@ -1117,6 +1530,226 @@ export default function MarsMission({
         )}
 
         {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE B & C: ROVER FAIRING INTEGRATION SCREEN               */}
+        {/* (/images/WhatsApp Image 2026-11-15 at 14.40.47_2.jpeg)      */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "PHASE_BC_ROVER" && (
+          <div className="fixed inset-0 z-30 bg-black overflow-hidden select-none">
+            {/* Crystal-Clear Full-Screen Rocket Fairing & Cyan HUD Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/WhatsApp Image 2026-11-15 at 14.40.47_2.jpeg"
+              alt="Mars Rover Fairing Integration HUD"
+              className="w-full h-full object-cover object-center pointer-events-none select-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Top-Left Navigation Bar */}
+            <div className="absolute top-3 left-4 z-20 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick(520);
+                  transitionToPhase("PHASE_A_SOLUTIONS");
+                }}
+                className="px-3 py-1.5 bg-slate-950/90 hover:bg-slate-900 border-2 border-cyan-400 text-cyan-200 font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+              >
+                &lt; CHANGE SOLUTION
+              </button>
+
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-950/90 border border-cyan-400/70 font-press-start text-[9px] text-cyan-200 shadow-[3px_3px_0px_#000]">
+                <Rocket className="w-3.5 h-3.5 text-cyan-400" />
+                <span>PHASE B/C // ROVER PAYLOAD INTEGRATION</span>
+              </div>
+            </div>
+
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* LEFT SIDE: SINGLE CENTRAL ROCKET PAYLOAD SLOT (1 SLOT)    */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setHoverRoverSlot(true);
+              }}
+              onDragLeave={() => setHoverRoverSlot(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setHoverRoverSlot(false);
+                const droppedRoverId = e.dataTransfer.getData(
+                  "text/plain"
+                ) as MarsRoverSolutionId;
+                if (
+                  droppedRoverId === "perseverance" ||
+                  droppedRoverId === "curiosity"
+                ) {
+                  handleLoadRoverIntoFairing(droppedRoverId);
+                }
+              }}
+              onClick={() => {
+                if (loadedFairingRover) {
+                  handleRemoveRoverFromFairing();
+                }
+              }}
+              title={
+                loadedRoverDef
+                  ? `${loadedRoverDef.cardName} (Click to remove from payload bay)`
+                  : "Central Rocket Payload Bay (Drop or click a rover from the right panel)"
+              }
+              className={`absolute left-[18.2%] top-[20.0%] w-[15.2%] h-[39.0%] z-20 flex flex-col items-center justify-center p-2.5 text-center transition-all cursor-pointer border-[3px] ${
+                loadedRoverDef
+                  ? isLoadedRoverMismatched
+                    ? "bg-rose-950/90 border-rose-400 shadow-[0_0_24px_rgba(244,63,94,0.9)] animate-pulse"
+                    : "bg-cyan-950/90 border-emerald-400 shadow-[0_0_24px_rgba(52,211,153,0.9)]"
+                  : hoverRoverSlot
+                    ? "bg-cyan-400/35 border-white border-dashed shadow-[0_0_22px_rgba(34,211,238,0.95)] scale-105"
+                    : "bg-slate-950/60 hover:bg-cyan-950/65 border-cyan-300 border-dashed shadow-[0_0_16px_rgba(34,211,238,0.65)]"
+              }`}
+            >
+              {loadedRoverDef ? (
+                <>
+                  <MarsRoverPixelSprite
+                    roverId={loadedRoverDef.id}
+                    className="w-16 h-14 sm:w-24 sm:h-20 md:w-28 md:h-24 shrink-0"
+                  />
+                  <span
+                    className={`font-press-start text-[8px] sm:text-[10px] leading-tight mt-2 px-2 py-1 border ${
+                      isLoadedRoverMismatched
+                        ? "bg-rose-950 border-rose-300 text-rose-200"
+                        : "bg-slate-950/90 border-emerald-300 text-emerald-200"
+                    }`}
+                  >
+                    {loadedRoverDef.cardName}
+                  </span>
+                  <span className="font-silkscreen text-[8px] sm:text-[9px] text-cyan-200 mt-1.5">
+                    [ CLICK TO UNLOAD ]
+                  </span>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-1.5 px-1">
+                  <span className="px-2 py-0.5 bg-slate-950/90 border border-cyan-400/70 font-press-start text-[8px] sm:text-[9px] text-cyan-300">
+                    CENTRAL BAY
+                  </span>
+                  <span className="font-press-start text-[9px] sm:text-[11px] text-white drop-shadow-[1px_1px_0px_#000]">
+                    1 ROVER SLOT
+                  </span>
+                  <span className="font-silkscreen text-[8px] sm:text-[10px] text-cyan-200/90 leading-tight">
+                    DROP OR CLICK ROVER TO LOAD
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* RIGHT SIDE: TOP DASHED HEADER BOX INSIDE CYAN HUD PANEL   */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div className="absolute left-[63.0%] w-[29.6%] top-[14.3%] h-[9.2%] z-20 flex flex-col items-center justify-center text-center px-2">
+              <div className="font-press-start text-[9px] sm:text-xs md:text-sm text-white tracking-wider drop-shadow-[2px_2px_0px_#000]">
+                ROVER BAY (1 SLOT)
+              </div>
+              <div className="font-silkscreen text-[8px] sm:text-[10px] text-cyan-300 mt-0.5">
+                {`SELECTED: LOAD ${chosenRoverDef.shortName} (${loadedFairingRover ? 1 : 0} / 1)`}
+              </div>
+            </div>
+
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* RIGHT SIDE: MAIN CYAN HUD BODY — BOTH ROVERS              */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div className="absolute left-[62.2%] w-[31.2%] top-[24.8%] bottom-[8.5%] z-20 flex flex-col justify-between p-2 sm:p-3.5 overflow-hidden">
+              <div className="flex-1 flex flex-col justify-center gap-3 overflow-y-auto pr-0.5">
+                {MARS_ROVER_SOLUTIONS.map((rover) => {
+                  const isEquipped = loadedFairingRover === rover.id;
+                  const isEquippedWrong =
+                    isEquipped && rover.id !== selectedRoverSolution;
+
+                  return (
+                    <div
+                      key={rover.id}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", rover.id);
+                      }}
+                      onClick={() => handleLoadRoverIntoFairing(rover.id)}
+                      className={`group relative flex flex-col sm:flex-row items-center gap-3 px-3 py-3 sm:px-4 sm:py-4 border-2 transition-all cursor-pointer select-none shadow-[4px_4px_0px_#000] ${
+                        isEquipped
+                          ? isEquippedWrong
+                            ? "bg-rose-950/90 border-rose-400 text-rose-100"
+                            : "bg-emerald-950/85 border-emerald-400 text-emerald-100"
+                          : "bg-slate-950/90 hover:bg-cyan-950/85 border-cyan-400/70 hover:border-cyan-300 text-slate-100"
+                      }`}
+                    >
+                      {/* 16-Bit Pixel-Art Rover Illustration */}
+                      <div className="w-20 h-16 sm:w-24 sm:h-20 bg-slate-900/95 border-2 border-cyan-400/50 flex items-center justify-center shrink-0 p-1.5 shadow-[2px_2px_0px_#000]">
+                        <MarsRoverPixelSprite
+                          roverId={rover.id}
+                          className="w-full h-full"
+                        />
+                      </div>
+
+                      {/* Rover Card Info (No - SL1 / - SL2 tags) */}
+                      <div className="flex-1 min-w-0 text-center sm:text-left">
+                        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-1.5">
+                          <h3 className="font-press-start text-[10px] sm:text-xs md:text-sm text-white leading-snug">
+                            {rover.cardName}
+                          </h3>
+                          {isEquipped && (
+                            <span
+                              className={`px-2 py-0.5 font-press-start text-[7px] sm:text-[8px] border shrink-0 ${
+                                isEquippedWrong
+                                  ? "bg-rose-500 text-white border-rose-200"
+                                  : "bg-emerald-400 text-slate-950 border-white"
+                              }`}
+                            >
+                              LOADED
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="font-silkscreen text-[8px] sm:text-[10px] text-cyan-300 mt-1 leading-tight">
+                          {rover.specSummary}
+                        </p>
+
+                        <p className="font-vt323 text-sm sm:text-base text-slate-200 mt-1 leading-tight">
+                          {rover.pros[0]} &bull; {rover.pros[1]}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom Validation Banner & [ LAUNCH TO MARS > ] Button */}
+              <div className="pt-2 space-y-1.5 shrink-0">
+                {(isLoadedRoverMismatched || roverFairingError) && (
+                  <div className="px-2.5 py-1.5 bg-rose-950/95 border-2 border-rose-400 text-rose-200 font-press-start text-[7px] sm:text-[8px] leading-snug text-center animate-pulse">
+                    {isLoadedRoverMismatched
+                      ? "MISMATCHED ROVER — LOAD THE ROVER SELECTED IN PHASE A"
+                      : roverFairingError}
+                  </div>
+                )}
+
+                {!loadedFairingRover ? (
+                  <div className="px-2.5 py-2 bg-slate-950/90 border border-cyan-400/50 font-silkscreen text-[10px] sm:text-xs text-cyan-200 text-center">
+                    {`LOAD ${chosenRoverDef.cardName.toUpperCase()} INTO THE ROCKET BAY (0 / 1)`}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleLaunchFromRoverFairing}
+                    className={`w-full py-2.5 px-3 border-2 font-press-start text-[9px] sm:text-xs font-bold uppercase shadow-[4px_4px_0px_#000] transition-all cursor-pointer arcade-btn ${
+                      isRoverFairingReadyToLaunch
+                        ? "bg-emerald-400 hover:bg-emerald-300 border-white text-slate-950 animate-pulse"
+                        : "bg-rose-600 hover:bg-rose-500 border-rose-200 text-white"
+                    }`}
+                  >
+                    [ LAUNCH TO MARS &gt; ]
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
         {/* STAGES 1 TO 6: COMPACT BOTTOM HUD BAR ONLY                  */}
         {/* (Upper & center portion of NASA photo 100% unobstructed)    */}
         {/* ═══════════════════════════════════════════════════════════ */}
@@ -1328,6 +1961,7 @@ export default function MarsMission({
             {/* 3 Interactive Sampling Sites (Opaque HUD Labels + Glowing Cyan Circle Hotspots) */}
             {MARS_SAMPLING_SITES.map((site) => {
               const isHovered = hoveredSamplingSite === site.id;
+              const isSampled = sampledSites.includes(site.id);
               return (
                 <React.Fragment key={site.id}>
                   {/* High-Contrast 16-bit HUD Tag Covering Static "sampling area X" Text */}
@@ -1347,11 +1981,13 @@ export default function MarsMission({
                     className={`absolute z-20 min-w-[185px] sm:min-w-[235px] md:min-w-[265px] min-h-[12.2%] px-3 py-2 sm:px-4 sm:py-2.5 border-2 transition-all duration-150 flex flex-col items-center justify-center text-center cursor-pointer shadow-[4px_4px_0px_#000] ${
                       isHovered
                         ? "bg-cyan-950 border-white scale-105 shadow-[0_0_20px_rgba(34,211,238,0.95)]"
-                        : "bg-stone-950 border-cyan-400 hover:border-white"
+                        : isSampled
+                          ? "bg-emerald-950/95 border-emerald-400 hover:border-white"
+                          : "bg-stone-950 border-cyan-400 hover:border-white"
                     }`}
                   >
                     <span className="font-silkscreen text-[8px] sm:text-[10px] text-cyan-300 tracking-widest uppercase mb-0.5">
-                      {site.code}
+                      {isSampled ? `${site.code} — SAMPLED ✓` : site.code}
                     </span>
                     <span className="font-press-start text-[9px] sm:text-[11px] md:text-xs text-white leading-snug drop-shadow-[1px_1px_0px_#000]">
                       {site.label}
@@ -1378,17 +2014,25 @@ export default function MarsMission({
                     className={`absolute z-20 rounded-[50%] border-[3px] sm:border-4 transition-all duration-200 flex items-center justify-center cursor-pointer group ${
                       isHovered
                         ? "border-white bg-cyan-400/35 scale-110 shadow-[0_0_28px_rgba(34,211,238,1),inset_0_0_18px_rgba(34,211,238,0.8)]"
-                        : "border-cyan-300/90 bg-cyan-400/15 hover:bg-cyan-400/30 shadow-[0_0_16px_rgba(34,211,238,0.75)] animate-pulse"
+                        : isSampled
+                          ? "border-emerald-400 bg-emerald-400/25 shadow-[0_0_20px_rgba(52,211,153,0.85)]"
+                          : "border-cyan-300/90 bg-cyan-400/15 hover:bg-cyan-400/30 shadow-[0_0_16px_rgba(34,211,238,0.75)] animate-pulse"
                     }`}
                   >
                     <span
                       className={`px-2 py-0.5 font-press-start text-[8px] sm:text-[9px] border transition-all ${
                         isHovered
                           ? "bg-cyan-300 text-slate-950 border-white scale-105 shadow-[2px_2px_0px_#000]"
-                          : "bg-stone-950/90 text-cyan-200 border-cyan-400/80"
+                          : isSampled
+                            ? "bg-emerald-400 text-slate-950 border-white"
+                            : "bg-stone-950/90 text-cyan-200 border-cyan-400/80"
                       }`}
                     >
-                      {isHovered ? "[ DEPLOY HERE ]" : `AREA 0${site.areaNumber}`}
+                      {isHovered
+                        ? "[ DEPLOY HERE ]"
+                        : isSampled
+                          ? "SAMPLED ✓"
+                          : `AREA 0${site.areaNumber}`}
                     </span>
                   </button>
                 </React.Fragment>
@@ -1405,70 +2049,505 @@ export default function MarsMission({
                   </span>
                 </div>
                 <span className="font-silkscreen text-[9px] text-amber-300 shrink-0">
-                  0.38G
+                  {`SAMPLED: ${sampledSites.length}/3`}
                 </span>
               </div>
-              <p className="font-silkscreen text-[9px] sm:text-[10px] text-stone-300 mt-1 truncate">
-                {hoveredSamplingSite
-                  ? MARS_SAMPLING_SITES.find((s) => s.id === hoveredSamplingSite)?.geologyType
-                  : `ROVER: ${chosenRoverDef.shortName} // CLICK ANY CYAN RING (1-3)`}
-              </p>
+              {sampledSites.length > 0 ? (
+                <div className="flex items-center justify-between gap-2 mt-1.5">
+                  <span className="font-silkscreen text-[9px] text-emerald-300 truncate">
+                    CORE SAMPLES SECURED!
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playVictoryFanfare();
+                      transitionToPhase("PHASE_F_VICTORY");
+                    }}
+                    className="px-2.5 py-1 bg-emerald-400 hover:bg-emerald-300 border border-white text-slate-950 font-press-start text-[8px] font-bold shadow-[2px_2px_0px_#000] cursor-pointer arcade-btn shrink-0"
+                  >
+                    [ COMPLETE MISSION &gt; ]
+                  </button>
+                </div>
+              ) : (
+                <p className="font-silkscreen text-[9px] sm:text-[10px] text-stone-300 mt-1 truncate">
+                  {hoveredSamplingSite
+                    ? MARS_SAMPLING_SITES.find(
+                        (s) => s.id === hoveredSamplingSite
+                      )?.geologyType
+                    : `ROVER: ${chosenRoverDef.shortName} // CLICK ANY CYAN RING (1-3)`}
+                </p>
+              )}
             </div>
           </div>
         )}
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/* PHASE E2: SELECTED SAMPLING SITE VIEW                       */}
-        {/* (Ready for site-specific drilling/analysis mini-game)       */}
+        {/* PHASE E2: 8x4 GRID ROVER PATH-PLANNING & EXECUTION GAME     */}
+        {/* (/images/WhatsApp Image 2026-11-15 at 15.29.11*.jpg)        */}
         {/* ═══════════════════════════════════════════════════════════ */}
         {phase === "SAMPLING_SITE_VIEW" && (
-          <div className="my-auto mx-auto w-full max-w-3xl bg-stone-950/95 border-2 border-cyan-400 p-5 sm:p-7 shadow-[8px_8px_0px_#000] space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cyan-400/40 pb-3">
-              <div>
-                <span className="font-silkscreen text-xs text-cyan-300 block">
-                  {`${activeSamplingSiteDef.code} // ACTIVE ROVER: ${chosenRoverDef.shortName}`}
-                </span>
-                <h2 className="font-press-start text-base sm:text-xl text-white mt-1">
-                  {activeSamplingSiteDef.label}
-                </h2>
-              </div>
+          <div className="fixed inset-0 z-30 bg-black overflow-hidden select-none">
+            {/* Full-Screen 8x4 Grid Martian Terrain Background Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={activeSamplingSiteDef.gridImage}
+              alt={`${activeSamplingSiteDef.label} 8x4 Grid`}
+              className="w-full h-full object-fill pointer-events-none select-none"
+              style={{ imageRendering: "auto" }}
+            />
 
-              <button
-                type="button"
-                onClick={() => {
-                  sfx.playClick(580);
-                  transitionToPhase("SAMPLING_SITE_MAP");
-                }}
-                className="px-3.5 py-2 bg-stone-900 hover:bg-stone-800 border-2 border-cyan-400 text-cyan-200 hover:text-white font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
-              >
-                [ &lt; BACK TO SITE MAP ]
-              </button>
+            {/* Top Compact Site Telemetry Pill */}
+            <div className="absolute top-1 left-3 right-3 z-30 flex items-center justify-between gap-2 pointer-events-none">
+              <div className="px-2.5 py-0.5 bg-stone-950/90 border border-cyan-400/80 font-press-start text-[8px] sm:text-[9px] text-cyan-200 shadow-[2px_2px_0px_#000]">
+                {`${activeSamplingSiteDef.code} // ${activeSamplingSiteDef.label.toUpperCase()}`}
+              </div>
+              <div className="hidden sm:block px-2.5 py-0.5 bg-stone-950/90 border border-amber-400/80 font-silkscreen text-[9px] sm:text-[10px] text-amber-300 shadow-[2px_2px_0px_#000]">
+                {roverExecStatus === "PLANNING"
+                  ? isTargetReachedInSim
+                    ? "TARGET REACHED IN SIMULATION — PRESS [ START ROVER ] OR ENTER!"
+                    : "USE WASD / ARROWS TO SIMULATE PATH FROM START TO TARGET [X]"
+                  : roverExecStatus === "DRIVING"
+                    ? `EXECUTING QUEUED COMMANDS... STEP ${roverStepIndex} / ${plannedMoves.length}`
+                    : roverExecStatus === "DRILLING"
+                      ? `DRILLING & ANALYZING ${activeSamplingSiteDef.sampleName.toUpperCase()}...`
+                      : "SAMPLE ACQUIRED!"}
+              </div>
             </div>
 
-            <div className="bg-stone-900/90 border border-cyan-400/50 p-4 space-y-2">
-              <div className="font-press-start text-[10px] text-amber-300">
-                GEOLOGICAL CLASSIFICATION: {activeSamplingSiteDef.geologyType}
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* ALIGNED 8x4 INTERACTIVE GRID OVERLAY                      */}
+            {/* (Matches cyan 8x4 grid on image: left 9.6%, top 5.0%,     */}
+            {/*  width 83.4%, height 74.2%)                               */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div className="absolute left-[9.6%] top-[5.0%] w-[83.4%] h-[74.2%] z-20">
+              {/* 1. SVG Telemetry Path Line & Wheel Tracks Overlay */}
+              <svg
+                viewBox="0 0 800 400"
+                preserveAspectRatio="none"
+                className="absolute inset-0 w-full h-full pointer-events-none z-20"
+              >
+                {/* Simulated Planned Path Polyline (Outer Glow + Animated Dashed Core) */}
+                {plannedPathCells.length > 1 && (
+                  <>
+                    <polyline
+                      fill="none"
+                      stroke={
+                        isTargetReachedInSim
+                          ? "rgba(52, 211, 153, 0.45)"
+                          : "rgba(34, 211, 238, 0.45)"
+                      }
+                      strokeWidth="16"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={plannedPathCells
+                        .map((c) => `${c.col * 100 + 50},${c.row * 100 + 50}`)
+                        .join(" ")}
+                    />
+                    <polyline
+                      fill="none"
+                      stroke={isTargetReachedInSim ? "#34d399" : "#22d3ee"}
+                      strokeWidth="6"
+                      strokeDasharray="14 8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={plannedPathCells
+                        .map((c) => `${c.col * 100 + 50},${c.row * 100 + 50}`)
+                        .join(" ")}
+                    />
+                  </>
+                )}
+
+                {/* Traversed Wheel Track Lines During/After Rover Execution */}
+                {roverExecStatus !== "PLANNING" && roverStepIndex > 0 && (
+                  <polyline
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="8"
+                    strokeDasharray="6 6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={plannedPathCells
+                      .slice(0, roverStepIndex + 1)
+                      .map((c) => `${c.col * 100 + 50},${c.row * 100 + 50}`)
+                      .join(" ")}
+                  />
+                )}
+
+                {/* Directional Waypoint Dots & Arrowheads Along Simulated Path */}
+                {plannedPathCells.map((cell, idx) => {
+                  if (idx === 0) return null;
+                  const prev = plannedPathCells[idx - 1];
+                  const cx = cell.col * 100 + 50;
+                  const cy = cell.row * 100 + 50;
+                  const midX = (prev.col * 100 + 50 + cx) / 2;
+                  const midY = (prev.row * 100 + 50 + cy) / 2;
+                  const angle =
+                    (Math.atan2(
+                      cy - (prev.row * 100 + 50),
+                      cx - (prev.col * 100 + 50)
+                    ) *
+                      180) /
+                    Math.PI;
+
+                  return (
+                    <g key={`${cell.col}-${cell.row}-${idx}`}>
+                      <g
+                        transform={`translate(${midX}, ${midY}) rotate(${angle})`}
+                      >
+                        <polygon
+                          points="-8,-7 10,0 -8,7"
+                          fill={isTargetReachedInSim ? "#6ee7b7" : "#67e8f9"}
+                        />
+                      </g>
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={idx === plannedPathCells.length - 1 ? 11 : 6}
+                        fill={isTargetReachedInSim ? "#10b981" : "#06b6d4"}
+                        stroke="#ffffff"
+                        strokeWidth="2.5"
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* 2. Interactive 8x4 Grid Cells (Click adjacent cell to queue step) */}
+              <div className="grid grid-cols-8 grid-rows-4 w-full h-full relative z-10">
+                {Array.from({ length: 32 }).map((_, idx) => {
+                  const col = idx % 8;
+                  const row = Math.floor(idx / 8);
+                  const isStart =
+                    col === activeSamplingSiteDef.startCell.col &&
+                    row === activeSamplingSiteDef.startCell.row;
+                  const isTarget =
+                    col === activeSamplingSiteDef.targetCell.col &&
+                    row === activeSamplingSiteDef.targetCell.row;
+                  const isSimTip =
+                    roverExecStatus === "PLANNING" &&
+                    col === simTipCell.col &&
+                    row === simTipCell.row;
+                  const isAdjacentToSimTip =
+                    roverExecStatus === "PLANNING" &&
+                    Math.abs(col - simTipCell.col) +
+                      Math.abs(row - simTipCell.row) ===
+                      1;
+
+                  return (
+                    <div
+                      key={`${col}-${row}`}
+                      onClick={() => {
+                        if (!isAdjacentToSimTip) return;
+                        if (row === simTipCell.row - 1) handleQueueMove("UP");
+                        else if (row === simTipCell.row + 1)
+                          handleQueueMove("DOWN");
+                        else if (col === simTipCell.col - 1)
+                          handleQueueMove("LEFT");
+                        else if (col === simTipCell.col + 1)
+                          handleQueueMove("RIGHT");
+                      }}
+                      className={`relative flex items-center justify-center transition-colors ${
+                        isAdjacentToSimTip
+                          ? "cursor-pointer hover:bg-cyan-400/20"
+                          : ""
+                      } ${
+                        isSimTip && !isStart
+                          ? "bg-cyan-400/20 shadow-[inset_0_0_16px_rgba(34,211,238,0.65)]"
+                          : ""
+                      }`}
+                    >
+                      {/* Subtle Start Badge inside Starting Point Cell */}
+                      {isStart && (
+                        <div className="absolute inset-1 bg-stone-950/75 border border-cyan-400/60 flex flex-col items-center justify-end pb-1 pointer-events-none">
+                          <span className="font-press-start text-[7px] sm:text-[8px] text-cyan-300 tracking-wider">
+                            START
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Bold Glowing 16-Bit Target 'X' Marker inside Sampling Point Cell */}
+                      {isTarget && (
+                        <div
+                          className={`absolute inset-1 flex flex-col items-center justify-center pointer-events-none border-2 transition-all ${
+                            isTargetReachedInSim ||
+                            roverExecStatus === "COMPLETED"
+                              ? "bg-emerald-950/85 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.9)]"
+                              : "bg-stone-950/85 border-rose-400 shadow-[0_0_18px_rgba(244,63,94,0.85)] animate-pulse"
+                          }`}
+                        >
+                          <span
+                            className={`font-press-start text-xl sm:text-3xl md:text-4xl font-bold leading-none drop-shadow-[2px_2px_0px_#000] ${
+                              isTargetReachedInSim ||
+                              roverExecStatus === "COMPLETED"
+                                ? "text-emerald-300"
+                                : "text-rose-400"
+                            }`}
+                          >
+                            X
+                          </span>
+                          <span className="font-silkscreen text-[7px] sm:text-[9px] text-white mt-0.5 tracking-wider">
+                            {roverExecStatus === "COMPLETED"
+                              ? "SAMPLED ✓"
+                              : "TARGET SITE"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              <p className="font-vt323 text-xl sm:text-2xl text-stone-100 leading-snug">
-                {activeSamplingSiteDef.scientificSummary}
-              </p>
+
+              {/* 3. Animated 16-Bit Rover Sprite on the 8x4 Grid */}
+              <div
+                style={{
+                  left: `${((currentRoverCell.col + 0.5) / 8) * 100}%`,
+                  top: `${((currentRoverCell.row + 0.5) / 4) * 100}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                className="absolute z-30 w-[11.5%] h-[22%] flex flex-col items-center justify-center pointer-events-none transition-all duration-300 ease-linear"
+              >
+                {/* Core Drilling / Laser Spectrometer Animation When Reached X */}
+                {roverExecStatus === "DRILLING" && (
+                  <div className="absolute -top-6 px-2 py-0.5 bg-amber-400 text-stone-950 border border-white font-press-start text-[7px] sm:text-[8px] animate-bounce shadow-[2px_2px_0px_#000] whitespace-nowrap">
+                    DRILLING CORE...
+                  </div>
+                )}
+
+                <div
+                  className={`w-full h-full flex items-center justify-center transition-transform duration-150 ${
+                    currentRoverHeading === "LEFT" ? "-scale-x-100" : ""
+                  } ${
+                    roverExecStatus === "DRIVING" ||
+                    roverExecStatus === "DRILLING"
+                      ? "animate-bounce"
+                      : ""
+                  }`}
+                >
+                  <MarsRoverPixelSprite
+                    roverId={selectedRoverSolution}
+                    className="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.95)]"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-              <span className="font-silkscreen text-xs text-emerald-300">
-                STATUS: SITE LOCKED — READY FOR ROVER COMMAND QUEUE &amp; CORE DRILLING
-              </span>
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* BOTTOM COMMAND QUEUE & EXECUTION HUD BAR                  */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div className="absolute bottom-0 left-0 right-0 h-[19.8%] z-30 bg-stone-950/95 border-t-2 border-cyan-400 px-3 sm:px-5 py-2 flex flex-col justify-between shadow-[0_-6px_16px_rgba(0,0,0,0.9)]">
+              {/* Top Row: D-Pad Controls + Queued Command Sequence Pills */}
+              <div className="flex items-center justify-between gap-3 overflow-hidden">
+                {/* On-Screen WASD / Arrow Buttons */}
+                <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                  <span className="hidden md:inline font-press-start text-[8px] text-cyan-300 mr-1">
+                    QUEUE MOVE:
+                  </span>
+                  {(
+                    [
+                      { dir: "UP", label: "W / ↑" },
+                      { dir: "LEFT", label: "A / ←" },
+                      { dir: "DOWN", label: "S / ↓" },
+                      { dir: "RIGHT", label: "D / →" },
+                    ] as const
+                  ).map((btn) => (
+                    <button
+                      key={btn.dir}
+                      type="button"
+                      disabled={roverExecStatus !== "PLANNING"}
+                      onClick={() => handleQueueMove(btn.dir)}
+                      className="px-2 py-1 sm:px-2.5 sm:py-1.5 bg-slate-900 hover:bg-cyan-400 disabled:opacity-40 text-cyan-200 hover:text-slate-950 border border-cyan-400 font-press-start text-[8px] sm:text-[9px] shadow-[2px_2px_0px_#000] cursor-pointer arcade-btn"
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  sfx.playClick(640);
-                  transitionToPhase("SAMPLING_SITE_MAP");
-                }}
-                className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 border-2 border-white text-slate-950 font-press-start text-[10px] font-bold shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn"
-              >
-                [ CHANGE TARGET SITE ]
-              </button>
+                {/* Queued Command Stream */}
+                <div className="flex-1 flex items-center gap-1 overflow-x-auto px-2 py-1 bg-black/80 border border-cyan-400/40 min-h-[28px]">
+                  <span className="font-silkscreen text-[9px] text-amber-300 shrink-0 mr-1">
+                    {`QUEUE (${plannedMoves.length}):`}
+                  </span>
+                  {plannedMoves.length === 0 ? (
+                    <span className="font-silkscreen text-[9px] text-stone-400 truncate">
+                      PRESS WASD / ARROWS OR CLICK ADJACENT GRID CELLS TO PLOT PATH TO [X]
+                    </span>
+                  ) : (
+                    plannedMoves.map((mv, i) => {
+                      const arrowChar =
+                        mv === "UP"
+                          ? "↑"
+                          : mv === "DOWN"
+                            ? "↓"
+                            : mv === "LEFT"
+                              ? "←"
+                              : "→";
+                      const isExecuted =
+                        roverExecStatus !== "PLANNING" && i < roverStepIndex;
+                      return (
+                        <span
+                          key={i}
+                          className={`px-1.5 py-0.5 font-press-start text-[8px] border shrink-0 ${
+                            isExecuted
+                              ? "bg-emerald-400 text-slate-950 border-white"
+                              : "bg-cyan-950 text-cyan-200 border-cyan-400/70"
+                          }`}
+                        >
+                          {arrowChar}
+                        </span>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Row: Undo / Clear / Back + [ START ROVER / EXECUTE ] */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick(560);
+                      transitionToPhase("SAMPLING_SITE_MAP");
+                    }}
+                    className="px-2.5 py-1.5 bg-stone-900 hover:bg-stone-800 border-2 border-cyan-400 text-cyan-200 font-press-start text-[8px] sm:text-[9px] shadow-[2px_2px_0px_#000] cursor-pointer arcade-btn"
+                  >
+                    [ &lt; BACK TO SITE MAP ]
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={
+                      roverExecStatus !== "PLANNING" ||
+                      plannedMoves.length === 0
+                    }
+                    onClick={handleUndoMove}
+                    className="px-2.5 py-1.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-40 border border-amber-400/80 text-amber-200 font-press-start text-[8px] sm:text-[9px] shadow-[2px_2px_0px_#000] cursor-pointer arcade-btn"
+                  >
+                    [ UNDO STEP ]
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={
+                      roverExecStatus !== "PLANNING" ||
+                      plannedMoves.length === 0
+                    }
+                    onClick={handleClearMoves}
+                    className="px-2.5 py-1.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-40 border border-rose-400/80 text-rose-200 font-press-start text-[8px] sm:text-[9px] shadow-[2px_2px_0px_#000] cursor-pointer arcade-btn"
+                  >
+                    [ CLEAR PATH ]
+                  </button>
+                </div>
+
+                {/* Right Action: Execute Drive or Sample Complete Actions */}
+                <div className="flex items-center gap-2">
+                  {roverExecStatus === "COMPLETED" ? (
+                    <>
+                      <span className="hidden md:inline font-press-start text-[9px] text-emerald-300">
+                        {`✓ ${activeSamplingSiteDef.sampleName.toUpperCase()} COLLECTED!`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sfx.playClick(680);
+                          transitionToPhase("SAMPLING_SITE_MAP");
+                        }}
+                        className="px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 border-2 border-white text-slate-950 font-press-start text-[9px] sm:text-[10px] font-bold shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+                      >
+                        [ SAMPLE ANOTHER SITE ]
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sfx.playVictoryFanfare();
+                          transitionToPhase("PHASE_F_VICTORY");
+                        }}
+                        className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 border-2 border-white text-slate-950 font-press-start text-[9px] sm:text-[10px] font-bold shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn animate-pulse"
+                      >
+                        [ COMPLETE MISSION &gt; ]
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={
+                        roverExecStatus !== "PLANNING" || !isTargetReachedInSim
+                      }
+                      onClick={handleExecuteRoverPath}
+                      className={`px-4 py-2 sm:px-6 sm:py-2.5 border-2 font-press-start text-[9px] sm:text-xs font-bold uppercase shadow-[4px_4px_0px_#000] transition-all cursor-pointer arcade-btn ${
+                        roverExecStatus === "PLANNING" && isTargetReachedInSim
+                          ? "bg-emerald-400 hover:bg-emerald-300 border-white text-slate-950 animate-pulse shadow-[0_0_18px_rgba(52,211,153,0.95)]"
+                          : "bg-stone-900 border-stone-600 text-stone-400 opacity-70 cursor-not-allowed"
+                      }`}
+                    >
+                      {roverExecStatus === "DRIVING"
+                        ? "[ ROVER DRIVING... ]"
+                        : roverExecStatus === "DRILLING"
+                          ? "[ DRILLING CORE SAMPLE... ]"
+                          : isTargetReachedInSim
+                            ? "[ START ROVER / EXECUTE > ]"
+                            : "[ REACH TARGET X TO START ROVER ]"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE F: MARS MISSION VICTORY DEBRIEF (15.38.38.jpeg)       */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "PHASE_F_VICTORY" && (
+          <div className="my-auto mx-auto w-full max-w-4xl flex items-center justify-center">
+            <div className="relative w-full aspect-[937/530] max-h-[80vh] border-2 border-emerald-400 shadow-[8px_8px_0px_#000] overflow-hidden bg-stone-950">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/WhatsApp Image 2026-11-14 at 15.38.38.jpeg"
+                alt="Mars Mission Complete"
+                className="w-full h-full object-fill select-none"
+              />
+
+              <div className="absolute left-[49%] right-[6%] top-[50%] bottom-[10%] bg-slate-950/90 border-2 border-emerald-400/80 p-3 sm:p-5 flex flex-col justify-between shadow-[4px_4px_0px_#000]">
+                <div className="space-y-2 overflow-y-auto pr-1">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-950 border border-emerald-400 text-emerald-300 font-press-start text-[8px] sm:text-[9px]">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    <span>PHASE F // JEZERO SAMPLE ACQUISITION COMPLETE</span>
+                  </div>
+
+                  <h3 className="font-press-start text-xs sm:text-sm text-white leading-snug">
+                    WELL DONE, CMDR {playerName.toUpperCase()}!
+                  </h3>
+
+                  <p className="font-pixel-body text-emerald-100 text-[11px] sm:text-xs leading-relaxed">
+                    {`${chosenRoverDef.cardName} successfully navigated the delayed-command telemetry grid and extracted pristine Martian core samples from Jezero Crater (${sampledSites.length} / 3 sites sampled).`}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-emerald-500/30">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick(640);
+                      transitionToPhase("SAMPLING_SITE_MAP");
+                    }}
+                    className="px-3 py-2 bg-slate-900 hover:bg-slate-800 border-2 border-cyan-400 text-cyan-200 font-press-start text-[8px] sm:text-[9px] shadow-[2px_2px_0px_#000] cursor-pointer arcade-btn"
+                  >
+                    [ &lt; SITE MAP ]
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick(720);
+                      onAbort();
+                    }}
+                    className="px-3.5 py-2 bg-emerald-400 hover:bg-emerald-300 border-2 border-white text-slate-950 font-press-start text-[8px] sm:text-[9px] font-bold shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+                  >
+                    [ RETURN TO BASE &gt; ]
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
