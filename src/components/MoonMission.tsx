@@ -10,8 +10,6 @@ import {
   CheckCircle2,
   Play,
   Pause,
-  RotateCw,
-  Trash2,
   Shield,
   Heart,
   Compass,
@@ -30,6 +28,7 @@ export interface MoonMissionProps {
 
 export type MoonMissionPhase =
   | "PHASE_A_BRIEFING"
+  | "PHASE_A_SOLUTIONS"
   | "PHASE_BC_CARGO"
   | "STAGE_1"
   | "STAGE_2"
@@ -41,6 +40,55 @@ export type MoonMissionPhase =
   | "PHASE_E_EXPEDITION"
   | "PHASE_F_VICTORY"
   | "PHASE_F_FAILURE";
+
+export type LunarPowerSolutionId = "nuclear_reactor" | "solar_panels";
+
+interface LunarPowerSolution {
+  id: LunarPowerSolutionId;
+  slideNumber: number;
+  title: string;
+  shortName: string;
+  subtitle: string;
+  pros: string[];
+  cons: string[];
+}
+
+const LUNAR_POWER_SOLUTIONS: LunarPowerSolution[] = [
+  {
+    id: "nuclear_reactor",
+    slideNumber: 1,
+    title: "SOLUTION 1: NUCLEAR REACTOR",
+    shortName: "NUCLEAR REACTOR",
+    subtitle: "FISSION SURFACE POWER SYSTEM // CONTINUOUS BASELINE",
+    pros: [
+      "Continuous reliable power",
+      "High energy output",
+      "Independent of sunlight",
+    ],
+    cons: [
+      "High radiation risk",
+      "Extremely heavy payload",
+      "High launch cost",
+    ],
+  },
+  {
+    id: "solar_panels",
+    slideNumber: 2,
+    title: "SOLUTION 2: SOLAR PANELS",
+    shortName: "SOLAR PANELS",
+    subtitle: "PHOTOVOLTAIC SOLAR ARRAY // SUNLIGHT DEPENDENT",
+    pros: [
+      "Renewable energy source",
+      "Zero radiation risk",
+      "Low launch weight",
+    ],
+    cons: [
+      "Useless at night",
+      "Requires heavy batteries",
+      "Vulnerable to dust",
+    ],
+  },
+];
 
 interface MoonStageDefinition {
   id:
@@ -63,26 +111,188 @@ interface MoonStageDefinition {
   };
 }
 
-interface LunarCargoItem {
+interface FairingPayloadPart {
   id: string;
   name: string;
-  w: number;
-  h: number;
-  weight: number;
-  required: boolean;
-  color: string;
-  borderColor: string;
-  description: string;
-  category: string;
+  shortLabel: string;
+  solutionId: LunarPowerSolutionId;
 }
 
-interface PlacedLunarCargo {
-  uid: string;
-  itemId: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+interface FairingSlotPosition {
+  index: number;
+  label: string;
+  className: string;
+}
+
+const FAIRING_SLOTS: FairingSlotPosition[] = [
+  {
+    index: 0,
+    label: "SLOT 1 // UPPER PORT",
+    className: "left-[10.2%] top-[20.0%] w-[9.7%] h-[15.8%]",
+  },
+  {
+    index: 1,
+    label: "SLOT 2 // UPPER STBD",
+    className: "left-[33.4%] top-[20.0%] w-[9.7%] h-[15.8%]",
+  },
+  {
+    index: 2,
+    label: "SLOT 3 // LOWER PORT",
+    className: "left-[10.2%] top-[48.6%] w-[8.6%] h-[9.8%]",
+  },
+  {
+    index: 3,
+    label: "SLOT 4 // LOWER STBD",
+    className: "left-[33.4%] top-[48.6%] w-[9.7%] h-[9.8%]",
+  },
+];
+
+const FAIRING_PAYLOAD_PARTS: FairingPayloadPart[] = [
+  {
+    id: "u235_core",
+    name: "Uranium-235 Reactor Core",
+    shortLabel: "U-235 CORE",
+    solutionId: "nuclear_reactor",
+  },
+  {
+    id: "stirling_converters",
+    name: "Stirling Power Converters",
+    shortLabel: "STIRLING GEN",
+    solutionId: "nuclear_reactor",
+  },
+  {
+    id: "radiator_panels",
+    name: "Deployable Radiator Panels",
+    shortLabel: "RADIATORS",
+    solutionId: "nuclear_reactor",
+  },
+  {
+    id: "radiation_shield",
+    name: "Radiation Shield",
+    shortLabel: "RAD SHIELD",
+    solutionId: "nuclear_reactor",
+  },
+  {
+    id: "pv_arrays",
+    name: "Deployable Photovoltaic Arrays",
+    shortLabel: "PV ARRAYS",
+    solutionId: "solar_panels",
+  },
+  {
+    id: "battery_bank",
+    name: "High-Capacity Battery Bank",
+    shortLabel: "LI-ION BANK",
+    solutionId: "solar_panels",
+  },
+  {
+    id: "pmu_controller",
+    name: "Power Management Unit",
+    shortLabel: "PMU CONTROL",
+    solutionId: "solar_panels",
+  },
+  {
+    id: "tracking_gimbals",
+    name: "Solar Tracking Gimbals",
+    shortLabel: "SUN GIMBALS",
+    solutionId: "solar_panels",
+  },
+];
+
+function FairingPartPixelIcon({
+  partId,
+  className = "w-8 h-8",
+}: {
+  partId: string;
+  className?: string;
+}) {
+  switch (partId) {
+    case "u235_core":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="6" y="2" width="12" height="20" fill="#334155" />
+          <rect x="8" y="4" width="8" height="16" fill="#064e3b" />
+          <rect x="9" y="6" width="6" height="12" fill="#22c55e" />
+          <rect x="10" y="8" width="4" height="8" fill="#86efac" />
+          <rect x="4" y="5" width="2" height="14" fill="#38bdf8" />
+          <rect x="18" y="5" width="2" height="14" fill="#38bdf8" />
+        </svg>
+      );
+    case "stirling_converters":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="2" y="8" width="20" height="8" fill="#94a3b8" />
+          <rect x="5" y="6" width="14" height="12" fill="#475569" />
+          <rect x="7" y="8" width="10" height="8" fill="#f59e0b" />
+          <rect x="9" y="10" width="6" height="4" fill="#fde047" />
+          <rect x="1" y="10" width="3" height="4" fill="#38bdf8" />
+          <rect x="20" y="10" width="3" height="4" fill="#38bdf8" />
+        </svg>
+      );
+    case "radiator_panels":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="2" y="4" width="20" height="16" fill="#cbd5e1" />
+          <rect x="4" y="6" width="3" height="12" fill="#f59e0b" />
+          <rect x="9" y="6" width="3" height="12" fill="#fbbf24" />
+          <rect x="14" y="6" width="3" height="12" fill="#f59e0b" />
+          <rect x="18" y="6" width="2" height="12" fill="#38bdf8" />
+        </svg>
+      );
+    case "radiation_shield":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="4" y="4" width="16" height="16" fill="#475569" />
+          <rect x="6" y="6" width="12" height="12" fill="#1e293b" />
+          <rect x="8" y="8" width="8" height="8" fill="#eab308" />
+          <rect x="10" y="10" width="4" height="4" fill="#0f172a" />
+          <rect x="3" y="10" width="2" height="4" fill="#facc15" />
+          <rect x="19" y="10" width="2" height="4" fill="#facc15" />
+        </svg>
+      );
+    case "pv_arrays":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="2" y="3" width="20" height="18" fill="#f59e0b" />
+          <rect x="4" y="5" width="7" height="6" fill="#0284c7" />
+          <rect x="13" y="5" width="7" height="6" fill="#0369a1" />
+          <rect x="4" y="13" width="7" height="6" fill="#0369a1" />
+          <rect x="13" y="13" width="7" height="6" fill="#0284c7" />
+          <rect x="5" y="6" width="3" height="2" fill="#7dd3fc" />
+          <rect x="14" y="14" width="3" height="2" fill="#7dd3fc" />
+        </svg>
+      );
+    case "battery_bank":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="4" y="5" width="16" height="15" fill="#1e293b" />
+          <rect x="7" y="3" width="3" height="2" fill="#94a3b8" />
+          <rect x="14" y="3" width="3" height="2" fill="#94a3b8" />
+          <rect x="6" y="7" width="12" height="3" fill="#22c55e" />
+          <rect x="6" y="11" width="12" height="3" fill="#22c55e" />
+          <rect x="6" y="15" width="12" height="3" fill="#4ade80" />
+        </svg>
+      );
+    case "pmu_controller":
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="3" y="4" width="18" height="16" fill="#065f46" />
+          <rect x="6" y="7" width="8" height="8" fill="#0f172a" />
+          <rect x="8" y="9" width="4" height="4" fill="#38bdf8" />
+          <rect x="16" y="7" width="3" height="10" fill="#fbbf24" />
+          <rect x="5" y="17" width="10" height="2" fill="#fde047" />
+        </svg>
+      );
+    case "tracking_gimbals":
+    default:
+      return (
+        <svg viewBox="0 0 24 24" className={className} style={{ shapeRendering: "crispEdges" }}>
+          <rect x="9" y="2" width="6" height="20" fill="#64748b" />
+          <rect x="3" y="9" width="18" height="6" fill="#94a3b8" />
+          <rect x="7" y="7" width="10" height="10" fill="#0284c7" />
+          <rect x="9" y="9" width="6" height="6" fill="#fde047" />
+        </svg>
+      );
+  }
 }
 
 interface LunarSampleNode {
@@ -113,87 +323,6 @@ interface ThrusterParticle {
   maxLife: number;
   color: string;
 }
-
-const LUNAR_CARGO_ITEMS: LunarCargoItem[] = [
-  {
-    id: "core_drill",
-    name: "CORE DRILL RIG (2x2)",
-    w: 2,
-    h: 2,
-    weight: 35,
-    required: true,
-    color: "bg-cyan-500/85",
-    borderColor: "border-cyan-200",
-    description:
-      "Required rotary-percussive drill to extract water-ice cores from permanently shadowed polar craters.",
-    category: "REQUIRED SCIENCE PAYLOAD",
-  },
-  {
-    id: "lunar_seismometer",
-    name: "LUNAR SEISMOMETER (1x3)",
-    w: 1,
-    h: 3,
-    weight: 25,
-    required: true,
-    color: "bg-sky-500/85",
-    borderColor: "border-sky-200",
-    description:
-      "Required ultra-sensitive seismic station to monitor shallow moonquakes and meteoroid impacts.",
-    category: "REQUIRED GEOPHYSICS",
-  },
-  {
-    id: "he3_canister",
-    name: "HELIUM-3 CANISTER (2x1)",
-    w: 2,
-    h: 1,
-    weight: 20,
-    required: true,
-    color: "bg-amber-500/85",
-    borderColor: "border-amber-200",
-    description:
-      "Required pressurized containment vessel for storing solar-wind implanted Helium-3 regolith samples.",
-    category: "REQUIRED CONTAINMENT",
-  },
-  {
-    id: "solar_beacon",
-    name: "SOLAR RELAY BEACON (1x2)",
-    w: 1,
-    h: 2,
-    weight: 18,
-    required: true,
-    color: "bg-emerald-500/85",
-    borderColor: "border-emerald-200",
-    description:
-      "Required S-band & optical telemetry transponder to relay South Pole data back to Earth.",
-    category: "REQUIRED COMMS",
-  },
-  {
-    id: "beach_umbrella",
-    name: "BEACH UMBRELLA (2x2)",
-    w: 2,
-    h: 2,
-    weight: 15,
-    required: false,
-    color: "bg-rose-600/80",
-    borderColor: "border-rose-300",
-    description:
-      "DECOY ITEM! Useless in a hard vacuum with no atmosphere—do not pack inside the Lunar Lander!",
-    category: "NON-FLIGHT DECOY",
-  },
-  {
-    id: "bowling_ball",
-    name: "BOWLING BALL (1x3)",
-    w: 1,
-    h: 3,
-    weight: 40,
-    required: false,
-    color: "bg-purple-600/80",
-    borderColor: "border-purple-300",
-    description:
-      "DECOY ITEM! Dead weight that wastes critical Saturn V translunar injection delta-v!",
-    category: "NON-FLIGHT DECOY",
-  },
-];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXACT 7 SEQUENTIAL MOON LOADING STAGES (EXACT IMAGES & EXACT TEXT)
@@ -278,7 +407,7 @@ const MOON_STAGES: MoonStageDefinition[] = [
     id: "STAGE_6",
     stageNumber: 6,
     title: "Stage 6: Powered Descent",
-    image: "/images/WhatsApp Image 2026-11-15 at 11.16.57.jpeg",
+    image: "/images/WhatsApp Image 2026-11-15 at 11.17.35.jpeg",
     description:
       "Final approach! Using only its descent engine and thrusters, the lander navigates past craters toward a safe landing zone.",
     nasaFact:
@@ -484,21 +613,27 @@ export default function MoonMission({
 }: MoonMissionProps) {
   const [phase, setPhase] = useState<MoonMissionPhase>("PHASE_A_BRIEFING");
   const [briefingPage, setBriefingPage] = useState<number>(0);
+  const [solutionSlideIndex, setSolutionSlideIndex] = useState<number>(0);
+  const [selectedPowerSolution, setSelectedPowerSolution] =
+    useState<LunarPowerSolutionId>("nuclear_reactor");
+  const swipeStartXRef = useRef<number | null>(null);
   const [loadProgress, setLoadProgress] = useState<number>(0);
   const [autoAdvance, setAutoAdvance] = useState<boolean>(true);
   const [typewriterIndex, setTypewriterIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // PHASE B & C: 4x4 LUNAR CARGO BAY STATE
+  // PHASE B & C: ROCKET FAIRING PAYLOAD INTEGRATION (4 FAIRING SLOTS)
   // ─────────────────────────────────────────────────────────────────────────
-  const [placedCargo, setPlacedCargo] = useState<PlacedLunarCargo[]>([]);
-  const [selectedToolId, setSelectedToolId] = useState<string>("core_drill");
-  const [isRotated, setIsRotated] = useState<boolean>(false);
-  const [hoverCell, setHoverCell] = useState<{ x: number; y: number } | null>(null);
-  const [cargoFeedback, setCargoFeedback] = useState<string>(
-    "SELECT A REQUIRED LUNAR TOOL AND PLACE IT INSIDE THE 4x4 LANDER BAY."
-  );
+  const [fairingSlots, setFairingSlots] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const [draggedPartId, setDraggedPartId] = useState<string | null>(null);
+  const [hoverSlotIndex, setHoverSlotIndex] = useState<number | null>(null);
+  const [fairingError, setFairingError] = useState<string | null>(null);
 
   // ─────────────────────────────────────────────────────────────────────────
   // PHASE E: 2D LUNAR SURFACE ROVER & 1/6G SAMPLE EXPEDITION STATE
@@ -640,7 +775,7 @@ export default function MoonMission({
         setBriefingPage((prev) => prev + 1);
         setTypewriterIndex(0);
       } else {
-        transitionToPhase("PHASE_BC_CARGO");
+        transitionToPhase("PHASE_A_SOLUTIONS");
       }
       return;
     }
@@ -651,6 +786,24 @@ export default function MoonMission({
       transitionToPhase("PHASE_E_EXPEDITION");
     }
   }, [phase, briefingPage, introBriefingPages.length, transitionToPhase]);
+
+  const handleToggleSolutionSlide = useCallback((dir: -1 | 1) => {
+    sfx.playClick(660);
+    setSolutionSlideIndex((prev) => {
+      const total = LUNAR_POWER_SOLUTIONS.length;
+      return (prev + dir + total) % total;
+    });
+  }, []);
+
+  const handleSelectSolution = useCallback(() => {
+    const chosen = LUNAR_POWER_SOLUTIONS[solutionSlideIndex] || LUNAR_POWER_SOLUTIONS[0];
+    setSelectedPowerSolution(chosen.id);
+    setFairingSlots([null, null, null, null]);
+    setFairingError(null);
+    sfx.playCollect();
+    setScore((prev) => prev + 500);
+    transitionToPhase("PHASE_BC_CARGO");
+  }, [solutionSlideIndex, transitionToPhase]);
 
   // Go back to previous stage
   const handlePrevStage = useCallback(() => {
@@ -695,102 +848,82 @@ export default function MoonMission({
   }, [currentStage, phase, autoAdvance, loadProgress, isTypewriterDone, handleNextStage]);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // PHASE B/C: 4x4 CARGO BAY LOGIC
+  // PHASE B/C: ROCKET FAIRING 4-SLOT PAYLOAD INTEGRATION LOGIC
   // ─────────────────────────────────────────────────────────────────────────
-  const selectedTool =
-    LUNAR_CARGO_ITEMS.find((item) => item.id === selectedToolId) || LUNAR_CARGO_ITEMS[0];
-  const activeW = isRotated ? selectedTool.h : selectedTool.w;
-  const activeH = isRotated ? selectedTool.w : selectedTool.h;
+  const equippedFairingCount = fairingSlots.filter(Boolean).length;
 
-  const packedRequiredCount = placedCargo.filter((p) => {
-    const def = LUNAR_CARGO_ITEMS.find((i) => i.id === p.itemId);
-    return def?.required;
-  }).length;
+  const mismatchedSlotIndices = fairingSlots.reduce<number[]>((acc, partId, idx) => {
+    if (!partId) return acc;
+    const part = FAIRING_PAYLOAD_PARTS.find((p) => p.id === partId);
+    if (part && part.solutionId !== selectedPowerSolution) {
+      acc.push(idx);
+    }
+    return acc;
+  }, []);
 
-  const packedDecoyCount = placedCargo.filter((p) => {
-    const def = LUNAR_CARGO_ITEMS.find((i) => i.id === p.itemId);
-    return def && !def.required;
-  }).length;
+  const hasIncompatiblePayload = mismatchedSlotIndices.length > 0;
+  const isFairingReadyToLaunch =
+    equippedFairingCount === 4 && !hasIncompatiblePayload;
 
-  const totalCargoWeight = placedCargo.reduce((acc, p) => {
-    const def = LUNAR_CARGO_ITEMS.find((i) => i.id === p.itemId);
-    return acc + (def ? def.weight : 0);
-  }, 0);
+  const handleEquipPartToSlot = (partId: string, targetSlotIdx?: number) => {
+    setFairingError(null);
+    setFairingSlots((prev) => {
+      const next = [...prev];
+      const existingIdx = next.indexOf(partId);
 
-  const isCargoReadyForLaunch = packedRequiredCount === 4 && packedDecoyCount === 0;
-
-  const canPlaceCargoAt = useCallback(
-    (gx: number, gy: number, w: number, h: number) => {
-      if (gx < 0 || gy < 0 || gx + w > 4 || gy + h > 4) return false;
-      if (placedCargo.some((p) => p.itemId === selectedTool.id)) return false;
-      for (let r = gy; r < gy + h; r++) {
-        for (let c = gx; c < gx + w; c++) {
-          const occupied = placedCargo.some(
-            (p) => c >= p.x && c < p.x + p.w && r >= p.y && r < p.y + p.h
-          );
-          if (occupied) return false;
-        }
+      // If no specific slot was targeted and it's already equipped, unequip it
+      if (targetSlotIdx === undefined && existingIdx !== -1) {
+        sfx.playClick(450);
+        next[existingIdx] = null;
+        return next;
       }
-      return true;
-    },
-    [placedCargo, selectedTool.id]
-  );
 
-  const handlePlaceCargoCell = (gx: number, gy: number) => {
-    const existing = placedCargo.find(
-      (p) => gx >= p.x && gx < p.x + p.w && gy >= p.y && gy < p.y + p.h
-    );
-    if (existing) {
-      sfx.playClick(420);
-      setPlacedCargo((prev) => prev.filter((p) => p.uid !== existing.uid));
-      setCargoFeedback(`REMOVED ${existing.itemId.toUpperCase()} FROM LUNAR CARGO BAY.`);
-      return;
-    }
+      const slotToUse =
+        targetSlotIdx !== undefined
+          ? targetSlotIdx
+          : next.findIndex((s) => s === null);
 
-    if (placedCargo.some((p) => p.itemId === selectedTool.id)) {
-      sfx.playDamage();
-      setCargoFeedback(`${selectedTool.name} IS ALREADY PACKED IN THE BAY!`);
-      return;
-    }
+      if (slotToUse === -1) {
+        sfx.playDamage();
+        setFairingError("ALL 4 FAIRING SLOTS ARE FULL — CLICK A SLOT TO REMOVE A PART.");
+        return prev;
+      }
 
-    if (!canPlaceCargoAt(gx, gy, activeW, activeH)) {
-      sfx.playDamage();
-      setCargoFeedback("INVALID FIT! ROTATE [R] OR CHOOSE AN OPEN 4x4 SLOT.");
-      return;
-    }
+      if (existingIdx !== -1) {
+        next[existingIdx] = null;
+      }
 
-    if (!selectedTool.required) {
-      sfx.playDamage();
-      setCargoFeedback(
-        `WARNING: ${selectedTool.name} IS A NON-FLIGHT DECOY! CLICK IT TO REMOVE BEFORE CDR.`
-      );
-    } else {
+      next[slotToUse] = partId;
       sfx.playCollect();
-      setCargoFeedback(`PACKED ${selectedTool.name} INTO LUNAR DESCENT MODULE.`);
-    }
-
-    setPlacedCargo((prev) => [
-      ...prev,
-      {
-        uid: `${selectedTool.id}-${Date.now()}`,
-        itemId: selectedTool.id,
-        x: gx,
-        y: gy,
-        w: activeW,
-        h: activeH,
-      },
-    ]);
+      return next;
+    });
   };
 
-  const handleAutoPackRequired = () => {
-    sfx.playCollect();
-    setPlacedCargo([
-      { uid: "auto-1", itemId: "core_drill", x: 0, y: 0, w: 2, h: 2 },
-      { uid: "auto-2", itemId: "lunar_seismometer", x: 2, y: 0, w: 1, h: 3 },
-      { uid: "auto-3", itemId: "solar_beacon", x: 3, y: 0, w: 1, h: 2 },
-      { uid: "auto-4", itemId: "he3_canister", x: 0, y: 2, w: 2, h: 1 },
-    ]);
-    setCargoFeedback("ALL 4 REQUIRED LUNAR SCIENCE PAYLOADS PACKED & VERIFIED!");
+  const handleRemoveFairingSlot = (slotIdx: number) => {
+    if (!fairingSlots[slotIdx]) return;
+    sfx.playClick(450);
+    setFairingError(null);
+    setFairingSlots((prev) => {
+      const next = [...prev];
+      next[slotIdx] = null;
+      return next;
+    });
+  };
+
+  const handleLaunchFromFairing = () => {
+    if (equippedFairingCount < 4) {
+      sfx.playDamage();
+      setFairingError("FILL ALL 4 ROCKET FAIRING SLOTS BEFORE LAUNCH.");
+      return;
+    }
+    if (hasIncompatiblePayload) {
+      sfx.playDamage();
+      setFairingError("INCOMPATIBLE PAYLOAD DETECTED — REMOVE NON-MATCHING SYSTEM");
+      return;
+    }
+    sfx.playVictoryFanfare();
+    setScore((prev) => prev + 1000);
+    transitionToPhase("STAGE_1");
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -828,11 +961,25 @@ export default function MoonMission({
   // ─────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (phase === "PHASE_BC_CARGO") {
-        if (e.key === "r" || e.key === "R") {
+      if (phase === "PHASE_A_SOLUTIONS") {
+        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
           e.preventDefault();
-          sfx.playClick(620);
-          setIsRotated((prev) => !prev);
+          handleToggleSolutionSlide(-1);
+        } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+          e.preventDefault();
+          handleToggleSolutionSlide(1);
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSelectSolution();
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
+      if (phase === "PHASE_BC_CARGO") {
+        if (e.key === "Escape") {
+          onAbort();
         }
         return;
       }
@@ -898,6 +1045,8 @@ export default function MoonMission({
     activeText.length,
     handleNextStage,
     handlePrevStage,
+    handleToggleSolutionSlide,
+    handleSelectSolution,
     handleDeploySeismometer,
     onAbort,
   ]);
@@ -1283,16 +1432,24 @@ export default function MoonMission({
   const totalSamplesCollected = iceCollected + he3Collected;
   const finalRank = score >= 3600 ? "S" : score >= 2600 ? "A" : "B";
 
+  const activeSolutionSlide =
+    LUNAR_POWER_SOLUTIONS[solutionSlideIndex] || LUNAR_POWER_SOLUTIONS[0];
+  const chosenSolutionDef =
+    LUNAR_POWER_SOLUTIONS.find((s) => s.id === selectedPowerSolution) ||
+    LUNAR_POWER_SOLUTIONS[0];
+
   const lifecycleTag =
     phase === "PHASE_A_BRIEFING"
       ? "PHASE A // ARTEMIS LUNAR CONCEPT & OBJECTIVES"
-      : phase === "PHASE_BC_CARGO"
-        ? "PHASE B/C // LUNAR LANDER CARGO BAY"
-        : currentStage
-          ? "PHASE D // SATURN V ASCENT & TRANSLUNAR TRANSIT"
-          : phase === "PHASE_E_EXPEDITION"
-            ? "PHASE E // LUNAR SURFACE OPERATIONS (1/6G EXPEDITION)"
-            : "PHASE F // LUNAR MISSION CLOSEOUT & ARCHIVAL REPORT";
+      : phase === "PHASE_A_SOLUTIONS"
+        ? "PHASE A // LUNAR SURFACE POWER ARCHITECTURE TRADE STUDY"
+        : phase === "PHASE_BC_CARGO"
+          ? "PHASE B/C // LUNAR LANDER CARGO BAY"
+          : currentStage
+            ? "PHASE D // SATURN V ASCENT & TRANSLUNAR TRANSIT"
+            : phase === "PHASE_E_EXPEDITION"
+              ? "PHASE E // LUNAR SURFACE OPERATIONS (1/6G EXPEDITION)"
+              : "PHASE F // LUNAR MISSION CLOSEOUT & ARCHIVAL REPORT";
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 text-slate-100 select-none flex flex-col font-sans">
@@ -1525,7 +1682,7 @@ export default function MoonMission({
                       ? "[ FAST-FORWARD ]"
                       : briefingPage < introBriefingPages.length - 1
                         ? "[ NEXT > ]"
-                        : "[ PROCEED TO PHASE B: LUNAR CARGO PREP > ]"}
+                        : "[ EVALUATE POWER SOLUTIONS > ]"}
                   </button>
                 </div>
               </div>
@@ -1534,227 +1691,397 @@ export default function MoonMission({
         )}
 
         {/* ═══════════════════════════════════════════════════════════ */}
-        {/* PHASE B & C: 4x4 LUNAR LANDER CARGO BAY MINI-GAME           */}
+        {/* PHASE A2: 2-SLIDE ENGINEERING SOLUTION SELECTOR             */}
+        {/* (/images/WhatsApp Image 2026-11-15 at 14.26.34.jpeg)        */}
         {/* ═══════════════════════════════════════════════════════════ */}
-        {phase === "PHASE_BC_CARGO" && (
-          <div className="my-auto mx-auto w-full max-w-6xl bg-slate-950/90 border-2 border-cyan-400 p-4 sm:p-6 shadow-[8px_8px_0px_#000] backdrop-blur-md space-y-4">
-            {/* Header Row */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cyan-400/40 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-cyan-400" />
-                  <span className="font-press-start text-[10px] text-cyan-300 uppercase">
-                    PHASE B/C // LUNAR LANDER CARGO BAY CONFIGURATION
-                  </span>
-                </div>
-                <h2 className="font-press-start text-sm sm:text-lg text-white mt-1">
-                  PACK ALL 4 REQUIRED LUNAR TOOLS (AVOID 2 DECOYS)
-                </h2>
+        {phase === "PHASE_A_SOLUTIONS" && (
+          <div
+            className="fixed inset-0 z-30 bg-black overflow-hidden select-none"
+            onTouchStart={(e) => {
+              swipeStartXRef.current = e.touches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(e) => {
+              if (swipeStartXRef.current === null) return;
+              const endX = e.changedTouches[0]?.clientX ?? swipeStartXRef.current;
+              const deltaX = endX - swipeStartXRef.current;
+              if (Math.abs(deltaX) > 40) {
+                handleToggleSolutionSlide(deltaX < 0 ? 1 : -1);
+              }
+              swipeStartXRef.current = null;
+            }}
+            onMouseDown={(e) => {
+              swipeStartXRef.current = e.clientX;
+            }}
+            onMouseUp={(e) => {
+              if (swipeStartXRef.current === null) return;
+              const deltaX = e.clientX - swipeStartXRef.current;
+              if (Math.abs(deltaX) > 50) {
+                handleToggleSolutionSlide(deltaX < 0 ? 1 : -1);
+              }
+              swipeStartXRef.current = null;
+            }}
+          >
+            {/* Full-screen HUD Frame Background Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/WhatsApp Image 2026-11-15 at 14.26.34.jpeg"
+              alt="Lunar Surface Power Trade Study HUD"
+              className="w-full h-full object-cover object-center pointer-events-none select-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Top-Left Back to Missions / Briefing Button */}
+            <div className="absolute top-3 left-4 z-20 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick(520);
+                  transitionToPhase("PHASE_A_BRIEFING");
+                }}
+                className="px-3 py-1.5 bg-slate-950/90 hover:bg-slate-900 border-2 border-cyan-400 text-cyan-200 font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+              >
+                &lt; BRIEFING
+              </button>
+            </div>
+
+            {/* TOP HEADER AREA (Inside Upper Cyan Frame Above Green/Red Boxes) */}
+            <div className="absolute left-[14.5%] right-[12.5%] top-[9.5%] h-[25.5%] flex flex-col items-center justify-center text-center px-3 sm:px-6">
+              <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-slate-950/85 border border-cyan-400/80 text-cyan-300 font-silkscreen text-[10px] sm:text-xs mb-1.5 shadow-[2px_2px_0px_#000]">
+                <span>LUNAR SOUTH POLE POWER SYSTEM TRADE STUDY</span>
+                <span className="text-amber-300 font-bold">
+                  [{activeSolutionSlide.slideNumber} / {LUNAR_POWER_SOLUTIONS.length}]
+                </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 font-silkscreen text-xs">
-                <span className="px-3 py-1 bg-slate-900 border border-cyan-400 text-cyan-200">
-                  REQUIRED TOOLS: <strong className="text-white">{packedRequiredCount} / 4</strong>
-                </span>
-                <span
-                  className={`px-3 py-1 border ${
-                    packedDecoyCount > 0
-                      ? "bg-rose-950/90 border-rose-400 text-rose-200 animate-pulse"
-                      : "bg-slate-900 border-emerald-400/60 text-emerald-300"
-                  }`}
-                >
-                  DECOYS: <strong>{packedDecoyCount}</strong>
-                </span>
-                <span className="px-3 py-1 bg-slate-900 border border-slate-500 text-slate-200">
-                  MASS: <strong>{totalCargoWeight} / 100 KG</strong>
-                </span>
+              <h1 className="font-press-start text-sm sm:text-xl md:text-2xl lg:text-3xl text-white tracking-wider drop-shadow-[0_3px_0px_#000] uppercase">
+                {activeSolutionSlide.title}
+              </h1>
+
+              <p className="font-silkscreen text-[10px] sm:text-xs text-cyan-200 mt-1.5 tracking-wide drop-shadow-[1px_1px_0px_#000]">
+                {activeSolutionSlide.subtitle}
+              </p>
+
+              {/* Slide Dots + Swipe / Arrow Hint */}
+              <div className="flex items-center gap-3 mt-2">
+                {LUNAR_POWER_SOLUTIONS.map((sol, idx) => (
+                  <button
+                    key={sol.id}
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick(660);
+                      setSolutionSlideIndex(idx);
+                    }}
+                    className={`px-2.5 py-0.5 font-press-start text-[8px] sm:text-[9px] border transition-all cursor-pointer ${
+                      idx === solutionSlideIndex
+                        ? "bg-cyan-400 text-slate-950 border-white shadow-[0_0_10px_rgba(34,211,238,0.9)]"
+                        : "bg-slate-950/80 text-cyan-300 border-cyan-400/50 hover:border-cyan-300"
+                    }`}
+                  >
+                    SOLUTION {sol.slideNumber}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Main Grid: Tool Selector + 4x4 Cargo Grid + Blueprint Scanner */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-              {/* Left Column: 6 Lunar Items (4 Required + 2 Decoys) */}
-              <div className="lg:col-span-5 space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-press-start text-cyan-300">
-                  <span>1. SELECT PAYLOAD ITEM</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sfx.playClick(640);
-                      setIsRotated((prev) => !prev);
-                    }}
-                    className="px-2.5 py-1 bg-cyan-950 hover:bg-cyan-900 border border-cyan-400 text-cyan-200 flex items-center gap-1 cursor-pointer"
-                  >
-                    <RotateCw className="w-3 h-3" />
-                    <span>[R] ROTATE ({activeW}x{activeH})</span>
-                  </button>
-                </div>
+            {/* LEFT PIXEL ARROW BUTTON (<) */}
+            <button
+              type="button"
+              onClick={() => handleToggleSolutionSlide(-1)}
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-14 sm:w-12 sm:h-16 bg-slate-950/90 hover:bg-cyan-400 text-cyan-300 hover:text-slate-950 border-2 border-cyan-400 hover:border-white flex items-center justify-center shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn transition-colors"
+              title="Previous Solution (Left Arrow)"
+            >
+              <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
+            </button>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {LUNAR_CARGO_ITEMS.map((item) => {
-                    const isPacked = placedCargo.some((p) => p.itemId === item.id);
-                    const isSelected = selectedToolId === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          sfx.playClick(600);
-                          setSelectedToolId(item.id);
-                        }}
-                        className={`text-left p-2.5 border-2 transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-slate-800 border-cyan-300 shadow-[3px_3px_0px_#000]"
-                            : "bg-slate-900/90 border-slate-700 hover:border-slate-500"
-                        } ${isPacked ? "opacity-60" : ""}`}
-                      >
-                        <div className="flex items-center justify-between gap-1">
-                          <span
-                            className={`text-[9px] font-press-start px-1.5 py-0.5 ${
-                              item.required
-                                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/50"
-                                : "bg-rose-500/20 text-rose-300 border border-rose-400/50"
-                            }`}
-                          >
-                            {item.required ? "REQUIRED" : "DECOY"}
-                          </span>
-                          <span className="font-silkscreen text-[10px] text-slate-300">
-                            {item.w}x{item.h} • {item.weight}KG
-                          </span>
-                        </div>
-                        <p className="font-press-start text-[10px] text-white mt-1.5 truncate">
-                          {item.name}
-                        </p>
-                        <p className="font-silkscreen text-[10px] text-emerald-300 mt-0.5">
-                          {isPacked ? "✓ PACKED (CLICK IN BAY TO REMOVE)" : "READY TO PACK"}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* RIGHT PIXEL ARROW BUTTON (>) */}
+            <button
+              type="button"
+              onClick={() => handleToggleSolutionSlide(1)}
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-14 sm:w-12 sm:h-16 bg-slate-950/90 hover:bg-cyan-400 text-cyan-300 hover:text-slate-950 border-2 border-cyan-400 hover:border-white flex items-center justify-center shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn transition-colors"
+              title="Next Solution (Right Arrow)"
+            >
+              <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
+            </button>
+
+            {/* LEFT GREEN BOX (PROS) — Aligned Inside Left Green Translucent Panel */}
+            <div className="absolute left-[17.3%] w-[33.8%] top-[38%] bottom-[15%] p-3 sm:p-5 md:p-6 flex flex-col justify-center overflow-hidden">
+              <div className="border-b-2 border-emerald-200/60 pb-1.5 sm:pb-2 mb-2.5 sm:mb-4 flex items-center justify-between">
+                <h2 className="font-press-start text-xs sm:text-base md:text-xl text-emerald-100 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+                  PROS
+                </h2>
+                <span className="font-silkscreen text-[9px] sm:text-[10px] px-2 py-0.5 bg-emerald-950/80 border border-emerald-300/60 text-emerald-200">
+                  ADVANTAGES
+                </span>
               </div>
 
-              {/* Center Column: Interactive 4x4 Cargo Bay Grid */}
-              <div className="lg:col-span-4 flex flex-col items-center">
-                <div className="w-full flex items-center justify-between text-[10px] font-press-start text-cyan-300 mb-2">
-                  <span>2. 4x4 DESCENT BAY GRID</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sfx.playClick(450);
-                      setPlacedCargo([]);
-                      setCargoFeedback("CARGO BAY CLEARED.");
-                    }}
-                    className="px-2 py-0.5 bg-slate-900 hover:bg-rose-950 border border-slate-600 text-slate-300 flex items-center gap-1 cursor-pointer"
+              <ul className="space-y-2 sm:space-y-3.5">
+                {activeSolutionSlide.pros.map((pro, idx) => (
+                  <li
+                    key={idx}
+                    className="font-vt323 text-lg sm:text-2xl md:text-3xl text-white leading-tight drop-shadow-[2px_2px_0px_#000] flex items-start gap-2"
                   >
-                    <Trash2 className="w-3 h-3" />
-                    <span>CLEAR</span>
-                  </button>
-                </div>
+                    <span className="text-emerald-200 font-bold shrink-0">&bull;</span>
+                    <span>{pro}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
+            {/* RIGHT RED BOX (CONS) — Aligned Inside Right Red Translucent Panel */}
+            <div className="absolute left-[53%] w-[33.8%] top-[38%] bottom-[15%] p-3 sm:p-5 md:p-6 flex flex-col justify-center overflow-hidden">
+              <div className="border-b-2 border-rose-200/60 pb-1.5 sm:pb-2 mb-2.5 sm:mb-4 flex items-center justify-between">
+                <h2 className="font-press-start text-xs sm:text-base md:text-xl text-rose-100 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+                  CONS
+                </h2>
+                <span className="font-silkscreen text-[9px] sm:text-[10px] px-2 py-0.5 bg-rose-950/80 border border-rose-300/60 text-rose-200">
+                  TRADE-OFFS
+                </span>
+              </div>
+
+              <ul className="space-y-2 sm:space-y-3.5">
+                {activeSolutionSlide.cons.map((con, idx) => (
+                  <li
+                    key={idx}
+                    className="font-vt323 text-lg sm:text-2xl md:text-3xl text-white leading-tight drop-shadow-[2px_2px_0px_#000] flex items-start gap-2"
+                  >
+                    <span className="text-rose-200 font-bold shrink-0">&bull;</span>
+                    <span>{con}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* BOTTOM-RIGHT [ SELECT ] BUTTON (Masks Static "NEXT" Text in Corner) */}
+            <div className="absolute bottom-0 right-0 z-20 bg-slate-950 px-3 py-2.5 sm:px-5 sm:py-3 border-t-2 border-l-2 border-cyan-400/80 shadow-[-4px_-4px_0px_#000] flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSelectSolution}
+                className="px-5 py-2.5 sm:px-7 sm:py-3 bg-cyan-400 hover:bg-cyan-300 border-2 border-white text-slate-950 font-press-start text-xs sm:text-sm font-bold uppercase tracking-wider shadow-[4px_4px_0px_#000] hover:shadow-[0_0_16px_rgba(34,211,238,0.9)] cursor-pointer arcade-btn animate-pulse"
+              >
+                [ SELECT ]
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE B & C: ROCKET FAIRING PAYLOAD PACKING SCREEN          */}
+        {/* (/images/WhatsApp Image 2026-11-15 at 14.40.47.jpeg)        */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "PHASE_BC_CARGO" && (
+          <div className="fixed inset-0 z-30 bg-black overflow-hidden select-none">
+            {/* Crystal-Clear Full-Screen Rocket Fairing & Cyan HUD Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/WhatsApp Image 2026-11-15 at 14.40.47.jpeg"
+              alt="Rocket Fairing Payload Integration HUD"
+              className="w-full h-full object-cover object-center pointer-events-none select-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Top-Left Navigation Bar */}
+            <div className="absolute top-3 left-4 z-20 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick(520);
+                  transitionToPhase("PHASE_A_SOLUTIONS");
+                }}
+                className="px-3 py-1.5 bg-slate-950/90 hover:bg-slate-900 border-2 border-cyan-400 text-cyan-200 font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+              >
+                &lt; CHANGE SOLUTION
+              </button>
+
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-950/90 border border-cyan-400/70 font-press-start text-[9px] text-cyan-200 shadow-[3px_3px_0px_#000]">
+                <Package className="w-3.5 h-3.5 text-cyan-400" />
+                <span>PHASE B/C // PAYLOAD INTEGRATION</span>
+              </div>
+            </div>
+
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* LEFT SIDE: 4 INTERACTIVE ROCKET FAIRING SLOTS             */}
+            {/* ───────────────────────────────────────────────────────── */}
+            {FAIRING_SLOTS.map((slot) => {
+              const installedPartId = fairingSlots[slot.index];
+              const installedPart = installedPartId
+                ? FAIRING_PAYLOAD_PARTS.find((p) => p.id === installedPartId)
+                : null;
+              const isMismatched =
+                installedPart && installedPart.solutionId !== selectedPowerSolution;
+              const isHovered = hoverSlotIndex === slot.index;
+
+              return (
                 <div
-                  className="grid grid-cols-4 gap-1.5 p-3 bg-slate-900 border-2 border-cyan-400 shadow-[6px_6px_0px_#000]"
-                  onMouseLeave={() => setHoverCell(null)}
-                >
-                  {Array.from({ length: 16 }).map((_, idx) => {
-                    const gx = idx % 4;
-                    const gy = Math.floor(idx / 4);
-                    const placed = placedCargo.find(
-                      (p) => gx >= p.x && gx < p.x + p.w && gy >= p.y && gy < p.y + p.h
-                    );
-                    const placedDef = placed
-                      ? LUNAR_CARGO_ITEMS.find((i) => i.id === placed.itemId)
-                      : null;
-
-                    const isPreview =
-                      hoverCell &&
-                      !placed &&
-                      gx >= hoverCell.x &&
-                      gx < hoverCell.x + activeW &&
-                      gy >= hoverCell.y &&
-                      gy < hoverCell.y + activeH;
-                    const previewValid =
-                      hoverCell && canPlaceCargoAt(hoverCell.x, hoverCell.y, activeW, activeH);
-
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onMouseEnter={() => setHoverCell({ x: gx, y: gy })}
-                        onClick={() => handlePlaceCargoCell(gx, gy)}
-                        className={`w-14 h-14 sm:w-16 sm:h-16 border-2 flex flex-col items-center justify-center p-1 text-center transition-colors cursor-pointer ${
-                          placed && placedDef
-                            ? `${placedDef.color} ${placedDef.borderColor}`
-                            : isPreview
-                              ? previewValid
-                                ? "bg-emerald-500/40 border-emerald-300"
-                                : "bg-rose-500/40 border-rose-400"
-                              : "bg-slate-950 hover:bg-slate-900 border-slate-700"
-                        }`}
-                      >
-                        {placed && placedDef ? (
-                          <>
-                            <span className="font-press-start text-[7px] text-white leading-tight line-clamp-2">
-                              {placedDef.name.split(" (")[0]}
-                            </span>
-                            <span className="font-silkscreen text-[8px] text-slate-950 bg-white/80 px-1 mt-0.5">
-                              {placedDef.required ? "OK" : "DECOY"}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="font-silkscreen text-[9px] text-slate-600">
-                            {gx},{gy}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleAutoPackRequired}
-                  className="mt-2.5 px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-cyan-400/60 text-cyan-200 font-silkscreen text-xs cursor-pointer"
-                >
-                  [ AUTO-LOAD 4 REQUIRED TOOLS ]
-                </button>
-              </div>
-
-              {/* Right Column: Blueprint Scanner & CDR Readiness */}
-              <div className="lg:col-span-3 bg-slate-900/95 border-2 border-cyan-400/70 p-3.5 space-y-3">
-                <div className="border-b border-cyan-400/30 pb-2">
-                  <span className="font-press-start text-[9px] text-cyan-300">
-                    BLUEPRINT SCANNER // TELEMETRY
-                  </span>
-                  <h3 className="font-press-start text-xs text-white mt-1">
-                    {selectedTool.name}
-                  </h3>
-                </div>
-
-                <p className="font-vt323 text-lg text-slate-200 leading-snug">
-                  {selectedTool.description}
-                </p>
-
-                <div className="p-2.5 bg-slate-950 border border-slate-700 font-silkscreen text-[11px] text-cyan-200">
-                  {cargoFeedback}
-                </div>
-
-                <button
-                  type="button"
-                  disabled={!isCargoReadyForLaunch}
-                  onClick={() => {
-                    sfx.playVictoryFanfare();
-                    setScore((prev) => prev + 1000);
-                    transitionToPhase("STAGE_1");
+                  key={slot.index}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setHoverSlotIndex(slot.index);
                   }}
-                  className={`w-full py-3 px-3 border-2 font-press-start text-[10px] uppercase shadow-[4px_4px_0px_#000] transition-all ${
-                    isCargoReadyForLaunch
-                      ? "bg-emerald-400 hover:bg-emerald-300 border-white text-slate-950 cursor-pointer animate-pulse"
-                      : "bg-slate-800 border-slate-600 text-slate-500 cursor-not-allowed"
+                  onDragLeave={() => setHoverSlotIndex(null)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setHoverSlotIndex(null);
+                    const droppedId =
+                      e.dataTransfer.getData("text/plain") || draggedPartId;
+                    if (droppedId) {
+                      handleEquipPartToSlot(droppedId, slot.index);
+                      setDraggedPartId(null);
+                    }
+                  }}
+                  onClick={() => {
+                    if (installedPart) {
+                      handleRemoveFairingSlot(slot.index);
+                    }
+                  }}
+                  title={
+                    installedPart
+                      ? `${installedPart.name} — Click to remove`
+                      : `${slot.label} — Drag or click a part from the right panel`
+                  }
+                  className={`absolute ${slot.className} z-20 flex flex-col items-center justify-center p-1 text-center transition-all ${
+                    installedPart
+                      ? isMismatched
+                        ? "bg-rose-950/90 border-2 border-rose-500 shadow-[0_0_16px_rgba(244,63,94,0.9)] animate-pulse cursor-pointer"
+                        : "bg-cyan-950/85 border-2 border-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.75)] cursor-pointer hover:bg-rose-950/70"
+                      : isHovered
+                        ? "bg-cyan-400/30 border-2 border-white shadow-[0_0_14px_rgba(34,211,238,0.85)]"
+                        : "bg-slate-950/25 hover:bg-cyan-950/40 border border-cyan-400/40"
                   }`}
                 >
-                  [ COMPLETE CDR &amp; INITIATE PHASE D LAUNCH &gt; ]
-                </button>
+                  {installedPart ? (
+                    <>
+                      <FairingPartPixelIcon
+                        partId={installedPart.id}
+                        className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 shrink-0 drop-shadow-[1px_1px_0px_#000]"
+                      />
+                      <span
+                        className={`font-press-start text-[6px] sm:text-[7px] md:text-[8px] leading-tight mt-0.5 line-clamp-2 ${
+                          isMismatched ? "text-rose-200" : "text-white"
+                        }`}
+                      >
+                        {installedPart.shortLabel}
+                      </span>
+                      {isMismatched && (
+                        <span className="font-silkscreen text-[7px] bg-rose-600 text-white px-1 mt-0.5">
+                          MISMATCH
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-silkscreen text-[8px] sm:text-[9px] text-cyan-200/80 drop-shadow-[1px_1px_0px_#000]">
+                      SLOT {slot.index + 1}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* RIGHT SIDE: TOP DASHED HEADER RECTANGLE                   */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div className="absolute left-[63.0%] w-[29.6%] top-[14.3%] h-[9.2%] z-20 flex flex-col items-center justify-center text-center px-2 overflow-hidden">
+              <h2 className="font-press-start text-[9px] sm:text-xs md:text-sm text-cyan-200 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+                PAYLOAD MANIFEST (4 SLOTS)
+              </h2>
+              <p className="font-silkscreen text-[9px] sm:text-xs text-amber-300 mt-0.5 truncate max-w-full drop-shadow-[1px_1px_0px_#000]">
+                SELECTED: {chosenSolutionDef.shortName} ({equippedFairingCount}/4)
+              </p>
+            </div>
+
+            {/* ───────────────────────────────────────────────────────── */}
+            {/* RIGHT SIDE: MAIN CYAN HUD INVENTORY BODY (ALL 8 ITEMS)    */}
+            {/* ───────────────────────────────────────────────────────── */}
+            <div className="absolute left-[62.2%] w-[31.2%] top-[24.8%] bottom-[8.5%] z-20 flex flex-col justify-between p-2 sm:p-3 overflow-hidden">
+              {/* Scrollable / Compact 8-Item Hardware List */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-1.5">
+                {FAIRING_PAYLOAD_PARTS.map((part) => {
+                  const slotIdx = fairingSlots.indexOf(part.id);
+                  const isEquipped = slotIdx !== -1;
+                  const isEquippedMismatch =
+                    isEquipped && part.solutionId !== selectedPowerSolution;
+
+                  return (
+                    <div
+                      key={part.id}
+                      draggable
+                      onDragStart={(e) => {
+                        setDraggedPartId(part.id);
+                        e.dataTransfer.setData("text/plain", part.id);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedPartId(null);
+                        setHoverSlotIndex(null);
+                      }}
+                      onClick={() => handleEquipPartToSlot(part.id)}
+                      className={`w-full p-1.5 sm:p-2 border-2 flex items-center gap-2.5 transition-all cursor-pointer ${
+                        isEquipped
+                          ? isEquippedMismatch
+                            ? "bg-rose-950/85 border-rose-400 text-rose-100"
+                            : "bg-cyan-950/85 border-cyan-300 text-white shadow-[2px_2px_0px_#000]"
+                          : "bg-slate-950/85 hover:bg-slate-900 border-cyan-500/40 hover:border-cyan-300 text-slate-100"
+                      }`}
+                    >
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-900 border border-cyan-400/50 p-1 shrink-0 flex items-center justify-center">
+                        <FairingPartPixelIcon
+                          partId={part.id}
+                          className="w-6 h-6 sm:w-7 sm:h-7"
+                        />
+                      </div>
+
+                      <div className="min-w-0 flex-1 text-left">
+                        <p className="font-press-start text-[7px] sm:text-[8px] md:text-[9px] text-white leading-snug truncate">
+                          {part.name}
+                        </p>
+                        <p className="font-silkscreen text-[8px] sm:text-[9px] text-cyan-300/90 truncate">
+                          {isEquipped
+                            ? `INSTALLED IN SLOT ${slotIdx + 1} (CLICK TO REMOVE)`
+                            : "DRAG OR CLICK TO INSTALL IN FAIRING"}
+                        </p>
+                      </div>
+
+                      {isEquipped && (
+                        <span
+                          className={`px-1.5 py-0.5 font-press-start text-[7px] shrink-0 border ${
+                            isEquippedMismatch
+                              ? "bg-rose-600 text-white border-rose-200 animate-pulse"
+                              : "bg-emerald-500 text-slate-950 border-white"
+                          }`}
+                        >
+                          EQUIPPED
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom Validation Banner & [ LAUNCH MISSION > ] Button */}
+              <div className="pt-2 space-y-1.5 shrink-0">
+                {(hasIncompatiblePayload || fairingError) && (
+                  <div className="px-2.5 py-1.5 bg-rose-950/95 border-2 border-rose-400 text-rose-200 font-press-start text-[7px] sm:text-[8px] leading-snug text-center animate-pulse">
+                    {hasIncompatiblePayload
+                      ? "INCOMPATIBLE PAYLOAD DETECTED — REMOVE NON-MATCHING SYSTEM"
+                      : fairingError}
+                  </div>
+                )}
+
+                {equippedFairingCount < 4 ? (
+                  <div className="px-2.5 py-2 bg-slate-950/90 border border-cyan-400/50 font-silkscreen text-[10px] sm:text-xs text-cyan-200 text-center">
+                    INSTALL 4 COMPATIBLE {chosenSolutionDef.shortName} PARTS ({equippedFairingCount} / 4)
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleLaunchFromFairing}
+                    className={`w-full py-2.5 px-3 border-2 font-press-start text-[9px] sm:text-xs font-bold uppercase shadow-[4px_4px_0px_#000] transition-all cursor-pointer arcade-btn ${
+                      isFairingReadyToLaunch
+                        ? "bg-emerald-400 hover:bg-emerald-300 border-white text-slate-950 animate-pulse"
+                        : "bg-rose-600 hover:bg-rose-500 border-rose-200 text-white"
+                    }`}
+                  >
+                    [ LAUNCH MISSION &gt; ]
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -2083,12 +2410,12 @@ export default function MoonMission({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-silkscreen text-xs">
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
-                    <span className="text-slate-400 block text-[10px]">SAMPLES</span>
-                    <strong className="text-cyan-300">3 H2O / 3 HE-3</strong>
+                    <span className="text-slate-400 block text-[10px]">POWER SYSTEM</span>
+                    <strong className="text-cyan-300">{chosenSolutionDef.shortName}</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
-                    <span className="text-slate-400 block text-[10px]">GRAVITY</span>
-                    <strong className="text-white">0.165g (1/6G)</strong>
+                    <span className="text-slate-400 block text-[10px]">SAMPLES</span>
+                    <strong className="text-white">3 H2O / 3 HE-3</strong>
                   </div>
                   <div className="p-2 bg-slate-900 border border-cyan-400/50">
                     <span className="text-slate-400 block text-[10px]">SCORE</span>
