@@ -39,6 +39,7 @@ export type MoonMissionPhase =
   | "STAGE_7"
   | "PHASE_E_EXPEDITION"
   | "PHASE_F_VICTORY"
+  | "PHASE_F_MISSION_REPORT"
   | "PHASE_F_FAILURE";
 
 export type LunarPowerSolutionId = "nuclear_reactor" | "solar_panels";
@@ -1203,6 +1204,27 @@ export default function MoonMission({
     return () => clearTimeout(timer);
   }, [phase, roverExecStatus, assemblyStageIndex, transitionToPhase]);
 
+  const activeSolutionSlide =
+    LUNAR_POWER_SOLUTIONS[solutionSlideIndex] || LUNAR_POWER_SOLUTIONS[0];
+  const chosenSolutionDef =
+    LUNAR_POWER_SOLUTIONS.find((s) => s.id === selectedPowerSolution) ||
+    LUNAR_POWER_SOLUTIONS[0];
+
+  const standardizedScore1000 = Math.min(
+    1000,
+    Math.max(100, Math.round((score / 4100) * 1000))
+  );
+  const finalRank =
+    standardizedScore1000 >= 900 ? "S" : standardizedScore1000 >= 750 ? "A" : "B";
+
+  const handleSendReportToBase = useCallback(() => {
+    sfx.playVictoryFanfare();
+    if (onMissionComplete) {
+      onMissionComplete(standardizedScore1000, chosenSolutionDef.shortName);
+    }
+    onAbort();
+  }, [onMissionComplete, standardizedScore1000, chosenSolutionDef.shortName, onAbort]);
+
   // ─────────────────────────────────────────────────────────────────────────
   // KEYBOARD CONTROLS ACROSS ALL PHASES
   // ─────────────────────────────────────────────────────────────────────────
@@ -1256,6 +1278,26 @@ export default function MoonMission({
         return;
       }
 
+      if (phase === "PHASE_F_VICTORY") {
+        if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+          e.preventDefault();
+          transitionToPhase("PHASE_F_MISSION_REPORT");
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
+      if (phase === "PHASE_F_MISSION_REPORT") {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSendReportToBase();
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
       if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
         if (phase === "PHASE_A_BRIEFING" || currentStage) {
           e.preventDefault();
@@ -1290,21 +1332,10 @@ export default function MoonMission({
     handleQueueLunarMove,
     handleUndoLunarMove,
     handleStartLunarRover,
+    handleSendReportToBase,
+    transitionToPhase,
     onAbort,
   ]);
-
-  const activeSolutionSlide =
-    LUNAR_POWER_SOLUTIONS[solutionSlideIndex] || LUNAR_POWER_SOLUTIONS[0];
-  const chosenSolutionDef =
-    LUNAR_POWER_SOLUTIONS.find((s) => s.id === selectedPowerSolution) ||
-    LUNAR_POWER_SOLUTIONS[0];
-
-  const standardizedScore1000 = Math.min(
-    1000,
-    Math.max(100, Math.round((score / 4100) * 1000))
-  );
-  const finalRank =
-    standardizedScore1000 >= 900 ? "S" : standardizedScore1000 >= 750 ? "A" : "B";
 
   useEffect(() => {
     if (!onPhaseProgress) return;
@@ -1313,19 +1344,13 @@ export default function MoonMission({
         ? "IN PHASE A"
         : phase === "PHASE_BC_CARGO"
           ? "IN PHASE B/C"
-          : phase === "PHASE_E_EXPEDITION"
+          : phase === "PHASE_E_EXPEDITION" ||
+              phase === "PHASE_F_VICTORY" ||
+              phase === "PHASE_F_MISSION_REPORT"
             ? "IN PHASE E"
-            : phase === "PHASE_F_VICTORY"
-              ? "FINISHED ✓"
-              : "IN PHASE D";
+            : "IN PHASE D";
     onPhaseProgress(progressLabel, chosenSolutionDef.shortName);
   }, [phase, onPhaseProgress, chosenSolutionDef.shortName]);
-
-  useEffect(() => {
-    if (phase === "PHASE_F_VICTORY" && onMissionComplete) {
-      onMissionComplete(standardizedScore1000, chosenSolutionDef.shortName);
-    }
-  }, [phase, onMissionComplete, standardizedScore1000, chosenSolutionDef.shortName]);
 
   const lifecycleTag =
     phase === "PHASE_A_BRIEFING"
@@ -2624,15 +2649,52 @@ export default function MoonMission({
                   <button
                     type="button"
                     onClick={() => {
-                      sfx.playClick(680);
-                      onAbort();
+                      sfx.playClick(740);
+                      transitionToPhase("PHASE_F_MISSION_REPORT");
                     }}
-                    className="px-4 py-2.5 bg-emerald-400 hover:bg-emerald-300 border-2 border-white text-slate-950 font-press-start text-[10px] font-bold shadow-[4px_4px_0px_#000] cursor-pointer"
+                    className="px-4 py-2.5 bg-emerald-400 hover:bg-emerald-300 border-2 border-white text-slate-950 font-press-start text-[10px] font-bold shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn animate-pulse"
                   >
-                    [ RETURN TO MISSION SELECT ]
+                    [ VIEW MISSION REPORT &gt; ]
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE F2: SOLUTION-SPECIFIC FINAL MISSION REPORT IMAGE      */}
+        {/*   - Nuclear Reactor: 16.10.56 (1).jpeg (Lunar South Pole)   */}
+        {/*   - Solar Panels:    16.12.12.jpeg     (Lunar Equator)      */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "PHASE_F_MISSION_REPORT" && (
+          <div className="fixed inset-0 top-[46px] z-30 bg-black select-none overflow-hidden">
+            {/* Full-Screen Crystal-Clear Final Mission Report Image (No Extra Text Overlaid) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={
+                selectedPowerSolution === "nuclear_reactor"
+                  ? "/images/WhatsApp Image 2026-11-15 at 16.10.56 (1).jpeg"
+                  : "/images/WhatsApp Image 2026-11-15 at 16.12.12.jpeg"
+              }
+              alt={
+                selectedPowerSolution === "nuclear_reactor"
+                  ? "Lunar South Pole Fission Surface Power Reactor Final Report"
+                  : "Lunar Equator Deployable Photovoltaic Arrays Final Report"
+              }
+              className="w-full h-full object-cover object-center pointer-events-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Interactive 16-Bit [ SEND IT TO THE BASE ] Exit Button Aligned Over Bottom-Right Area */}
+            <div className="absolute right-[1.2%] bottom-[1.8%] w-[28.5%] min-w-[220px] sm:min-w-[270px] min-h-[8.2%] z-30 flex items-stretch">
+              <button
+                type="button"
+                onClick={handleSendReportToBase}
+                className="w-full px-4 py-2.5 bg-cyan-400 hover:bg-emerald-400 border-2 border-white text-slate-950 font-press-start text-[10px] sm:text-xs md:text-sm font-bold tracking-wider uppercase shadow-[6px_6px_0px_#000] hover:shadow-[0_0_24px_rgba(52,211,153,0.95)] flex items-center justify-center gap-2 cursor-pointer arcade-btn animate-pulse transition-all"
+              >
+                <span>[ SEND IT TO THE BASE &gt; ]</span>
+              </button>
             </div>
           </div>
         )}

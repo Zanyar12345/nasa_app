@@ -292,6 +292,9 @@ export default function App() {
 
   const handleBackFromMission = () => {
     if (missionMode === "multiplayer" && mpRoom) {
+      if (hasRecordedFinishRef.current) {
+        return;
+      }
       handleLeaveRoom();
       return;
     }
