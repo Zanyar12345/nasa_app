@@ -472,6 +472,8 @@ export function MissionRouletteModal({
 }: MissionRouletteModalProps) {
   const [highlightIdx, setHighlightIdx] = useState<number>(0);
   const [locked, setLocked] = useState<boolean>(false);
+  const [lockedMission, setLockedMission] =
+    useState<MultiplayerMissionId | null>(null);
 
   const chosenMissionRef = useRef<MultiplayerMissionId | null>(targetMission);
   const onCompleteRef = useRef<() => void>(onComplete);
@@ -498,6 +500,7 @@ export function MissionRouletteModal({
     const intervalId = window.setInterval(() => {
       if (tick === 0) {
         setLocked(false);
+        setLockedMission(null);
       }
       tick += 1;
 
@@ -511,6 +514,7 @@ export function MissionRouletteModal({
           (m) => m.id === finalMission
         );
         setHighlightIdx(winnerIdx >= 0 ? winnerIdx : 0);
+        setLockedMission(finalMission);
         setLocked(true);
         sounds.playLaunchChord();
 
@@ -530,7 +534,7 @@ export function MissionRouletteModal({
 
   if (!isOpen || !targetMission) return null;
 
-  const activeTarget = chosenMissionRef.current || targetMission;
+  const activeTarget = lockedMission || targetMission;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 select-none">
@@ -608,7 +612,7 @@ export function MissionRouletteModal({
             type="button"
             onClick={() => {
               sounds.playLaunchChord();
-              onCompleteRef.current();
+              onComplete();
             }}
             className={`px-5 py-2.5 border-2 font-press-start text-[10px] sm:text-xs font-bold shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn ${
               locked
