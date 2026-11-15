@@ -13,7 +13,6 @@ import {
   Rocket,
   CheckCircle2,
 } from "lucide-react";
-import SciFiHudButton from "./SciFiHudButton";
 
 export interface MarsMissionProps {
   playerName: string;
@@ -33,7 +32,128 @@ export type MarsStageId =
   | "STAGE_6"
   | "STAGE_7";
 
-export type MarsMissionPhase = "BRIEFING_INTRO" | MarsStageId | "STAGE_GAME_READY";
+export type MarsMissionPhase =
+  | "BRIEFING_INTRO"
+  | "PHASE_A_SOLUTIONS"
+  | "PHASE_BC_ROVER"
+  | MarsStageId
+  | "SAMPLING_SITE_MAP"
+  | "SAMPLING_SITE_VIEW"
+  | "STAGE_GAME_READY";
+
+export type MarsSamplingSiteId = "rochette" | "wildcat" | "cheyava";
+
+export interface MarsSamplingSiteConfig {
+  id: MarsSamplingSiteId;
+  areaNumber: number;
+  label: string;
+  code: string;
+  geologyType: string;
+  scientificSummary: string;
+  circleLeft: string;
+  circleTop: string;
+  circleWidth: string;
+  circleHeight: string;
+  labelLeft: string;
+  labelTop: string;
+}
+
+export const MARS_SAMPLING_SITES: MarsSamplingSiteConfig[] = [
+  {
+    id: "rochette",
+    areaNumber: 1,
+    label: "Crater Floor – Rochette",
+    code: "SITE 01 // ROCHETTE",
+    geologyType: "ANCIENT BASALTIC LAVA & SALT MINERALS",
+    scientificSummary:
+      "Basaltic crater floor outcrop bearing water-deposited salt minerals that preserve ancient Martian groundwater history.",
+    circleLeft: "19.6%",
+    circleTop: "41.2%",
+    circleWidth: "11.8%",
+    circleHeight: "10.8%",
+    labelLeft: "20.6%",
+    labelTop: "29.0%",
+  },
+  {
+    id: "wildcat",
+    areaNumber: 2,
+    label: "Delta Front – Wildcat Ridge",
+    code: "SITE 02 // WILDCAT RIDGE",
+    geologyType: "FINE-GRAINED SEDIMENTARY MUDSTONE",
+    scientificSummary:
+      "Ancient lakebed mudstone rich in organic-bearing sulfate and clay minerals formed as a prehistoric Martian river delta settled.",
+    circleLeft: "85.8%",
+    circleTop: "42.8%",
+    circleWidth: "11.6%",
+    circleHeight: "10.8%",
+    labelLeft: "84.5%",
+    labelTop: "30.8%",
+  },
+  {
+    id: "cheyava",
+    areaNumber: 3,
+    label: "Neretva Vallis – Cheyava Falls",
+    code: "SITE 03 // CHEYAVA FALLS",
+    geologyType: "RIVER CHANNEL VEINS & LEOPARD SPOTS",
+    scientificSummary:
+      "Ancient river valley rock featuring calcium sulfate veins and millimeter-scale 'leopard spots' linked to potential microbial chemistry.",
+    circleLeft: "64.0%",
+    circleTop: "85.5%",
+    circleWidth: "11.6%",
+    circleHeight: "10.8%",
+    labelLeft: "64.8%",
+    labelTop: "72.0%",
+  },
+];
+
+export type MarsRoverSolutionId = "perseverance" | "curiosity";
+
+export interface MarsRoverSolution {
+  id: MarsRoverSolutionId;
+  slideNumber: number;
+  title: string;
+  shortName: string;
+  subtitle: string;
+  pros: string[];
+  cons: string[];
+}
+
+export const MARS_ROVER_SOLUTIONS: MarsRoverSolution[] = [
+  {
+    id: "perseverance",
+    slideNumber: 1,
+    title: "SOLUTION 1: LOAD PERSEVERANCE",
+    shortName: "PERSEVERANCE",
+    subtitle: "MARS 2020 SAMPLE CACHING ROVER // AUTONOMOUS CORING",
+    pros: [
+      "Seals rock cores",
+      "Faster autonomous driving",
+      "Reinforced durable wheels",
+    ],
+    cons: [
+      "No onboard lab",
+      "Drill pebble jam risk",
+      "Requires return mission",
+    ],
+  },
+  {
+    id: "curiosity",
+    slideNumber: 2,
+    title: "SOLUTION 2: LOAD CURIOSITY",
+    shortName: "CURIOSITY",
+    subtitle: "MARS SCIENCE LABORATORY // IN-SITU CHEMICAL ANALYSIS",
+    pros: [
+      "Onboard chemistry lab",
+      "Proven nuclear battery",
+      "Long-range rock laser",
+    ],
+    cons: [
+      "Cannot seal tubes",
+      "Slower terrain navigation",
+      "Fragile thin wheels",
+    ],
+  },
+];
 
 export interface MarsStageConfig {
   id: MarsStageId;
@@ -272,20 +392,38 @@ export default function MarsMission({
 }: MarsMissionProps) {
   const [phase, setPhase] = useState<MarsMissionPhase>("BRIEFING_INTRO");
   const [briefingPage, setBriefingPage] = useState<number>(0);
+  const [solutionSlideIndex, setSolutionSlideIndex] = useState<number>(0);
+  const [selectedRoverSolution, setSelectedRoverSolution] =
+    useState<MarsRoverSolutionId>("perseverance");
+  const [activeSamplingSite, setActiveSamplingSite] =
+    useState<MarsSamplingSiteId | null>(null);
+  const [hoveredSamplingSite, setHoveredSamplingSite] =
+    useState<MarsSamplingSiteId | null>(null);
   const [loadProgress, setLoadProgress] = useState<number>(0);
   const [autoAdvance, setAutoAdvance] = useState<boolean>(true);
   const [typewriterIndex, setTypewriterIndex] = useState<number>(0);
 
   const lastBlipRef = useRef<number>(0);
+  const swipeStartXRef = useRef<number | null>(null);
 
   useEffect(() => {
     sfx.enabled = soundOn;
   }, [soundOn]);
 
   const introBriefingPages = [
-    `Welcome back, ${playerName}! The scientists at the research center urgently need soil and rock samples from the Mars surface.`,
-    `You’ve been assigned to lead the mission. Grab your gear and prepare for launch. Good luck!`,
+    `Welcome back, ${playerName}! Orbital satellites have detected mysterious mineral formations and ancient riverbeds in Mars’s Jezero Crater. There are strong clues that microscopic life may have once existed there.`,
+    `However, cameras from orbit cannot analyze the rocks' internal chemistry. So, you must load the rover you choose onto the rocket and launch it to Mars, and remotely pilot it from Earth to drill samples.`,
+    `Remember that communication with Mars has up to a 20-minute delay and real-time control is not an option, so you must queue all your moves first.`,
   ];
+
+  const activeSolutionSlide =
+    MARS_ROVER_SOLUTIONS[solutionSlideIndex] || MARS_ROVER_SOLUTIONS[0];
+  const chosenRoverDef =
+    MARS_ROVER_SOLUTIONS.find((s) => s.id === selectedRoverSolution) ||
+    MARS_ROVER_SOLUTIONS[0];
+  const activeSamplingSiteDef =
+    MARS_SAMPLING_SITES.find((s) => s.id === activeSamplingSite) ||
+    MARS_SAMPLING_SITES[0];
 
   const currentStage = MARS_STAGES.find((s) => s.id === phase) || null;
   const activeText =
@@ -307,6 +445,32 @@ export default function MarsMission({
       sfx.playStageTransition();
     }
   }, []);
+
+  const handleToggleSolutionSlide = useCallback((direction: -1 | 1) => {
+    sfx.playClick(660);
+    setSolutionSlideIndex(
+      (prev) =>
+        (prev + direction + MARS_ROVER_SOLUTIONS.length) %
+        MARS_ROVER_SOLUTIONS.length
+    );
+  }, []);
+
+  const handleSelectSolution = useCallback(() => {
+    const chosen =
+      MARS_ROVER_SOLUTIONS[solutionSlideIndex] || MARS_ROVER_SOLUTIONS[0];
+    setSelectedRoverSolution(chosen.id);
+    sfx.playStageTransition();
+    transitionToPhase("STAGE_1");
+  }, [solutionSlideIndex, transitionToPhase]);
+
+  const handleSelectSamplingSite = useCallback(
+    (siteId: MarsSamplingSiteId) => {
+      setActiveSamplingSite(siteId);
+      sfx.playStageTransition();
+      transitionToPhase("SAMPLING_SITE_VIEW");
+    },
+    [transitionToPhase]
+  );
 
   // Typewriter effect with 8-bit voice blips
   useEffect(() => {
@@ -330,22 +494,44 @@ export default function MarsMission({
         setBriefingPage((prev) => prev + 1);
         setTypewriterIndex(0);
       } else {
-        transitionToPhase("STAGE_1");
+        transitionToPhase("PHASE_A_SOLUTIONS");
       }
+      return;
+    }
+    if (phase === "PHASE_A_SOLUTIONS") {
+      handleSelectSolution();
+      return;
+    }
+    if (phase === "STAGE_7") {
+      transitionToPhase("SAMPLING_SITE_MAP");
       return;
     }
     const idx = MARS_STAGES.findIndex((s) => s.id === phase);
     if (idx >= 0 && idx < MARS_STAGES.length - 1) {
       transitionToPhase(MARS_STAGES[idx + 1].id);
     }
-  }, [phase, briefingPage, introBriefingPages.length, transitionToPhase]);
+  }, [
+    phase,
+    briefingPage,
+    introBriefingPages.length,
+    transitionToPhase,
+    handleSelectSolution,
+  ]);
 
   // Go back to previous stage
   const handlePrevStage = useCallback(() => {
     sfx.playClick(580);
+    if (phase === "SAMPLING_SITE_VIEW") {
+      transitionToPhase("SAMPLING_SITE_MAP");
+      return;
+    }
+    if (phase === "SAMPLING_SITE_MAP") {
+      transitionToPhase("STAGE_7");
+      return;
+    }
     const idx = MARS_STAGES.findIndex((s) => s.id === phase);
     if (idx === 0) {
-      transitionToPhase("BRIEFING_INTRO");
+      transitionToPhase("PHASE_A_SOLUTIONS");
     } else if (idx > 0) {
       transitionToPhase(MARS_STAGES[idx - 1].id);
     }
@@ -353,7 +539,15 @@ export default function MarsMission({
 
   // Animated 0% -> 100% loading bar for Stages 1 through 6
   useEffect(() => {
-    if (phase === "BRIEFING_INTRO" || phase === "STAGE_7" || phase === "STAGE_GAME_READY") return;
+    if (
+      phase === "BRIEFING_INTRO" ||
+      phase === "PHASE_A_SOLUTIONS" ||
+      phase === "STAGE_7" ||
+      phase === "SAMPLING_SITE_MAP" ||
+      phase === "SAMPLING_SITE_VIEW" ||
+      phase === "STAGE_GAME_READY"
+    )
+      return;
 
     const interval = setInterval(() => {
       setLoadProgress((prev) => {
@@ -367,9 +561,19 @@ export default function MarsMission({
 
   // Auto-advance once loading reaches 100% and typewriter is finished (if autoAdvance is ON)
   useEffect(() => {
+    if (phase === "STAGE_7" && autoAdvance) {
+      const timeout = setTimeout(() => {
+        transitionToPhase("SAMPLING_SITE_MAP");
+      }, 2800);
+      return () => clearTimeout(timeout);
+    }
+
     if (
       phase === "BRIEFING_INTRO" ||
+      phase === "PHASE_A_SOLUTIONS" ||
       phase === "STAGE_7" ||
+      phase === "SAMPLING_SITE_MAP" ||
+      phase === "SAMPLING_SITE_VIEW" ||
       phase === "STAGE_GAME_READY" ||
       !autoAdvance ||
       loadProgress < 100 ||
@@ -381,16 +585,63 @@ export default function MarsMission({
       handleNextStage();
     }, 950);
     return () => clearTimeout(timeout);
-  }, [phase, autoAdvance, loadProgress, isTypewriterDone, handleNextStage]);
+  }, [
+    phase,
+    autoAdvance,
+    loadProgress,
+    isTypewriterDone,
+    handleNextStage,
+    transitionToPhase,
+  ]);
 
   // Keyboard navigation (Space / Enter / Right Arrow to advance, Left Arrow to go back)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (phase === "PHASE_A_SOLUTIONS") {
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleToggleSolutionSlide(-1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          handleToggleSolutionSlide(1);
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSelectSolution();
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
+      if (phase === "SAMPLING_SITE_MAP") {
+        if (e.key === "1") {
+          handleSelectSamplingSite("rochette");
+        } else if (e.key === "2") {
+          handleSelectSamplingSite("wildcat");
+        } else if (e.key === "3") {
+          handleSelectSamplingSite("cheyava");
+        } else if (e.key === "ArrowLeft") {
+          handlePrevStage();
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
+      if (phase === "SAMPLING_SITE_VIEW") {
+        if (e.key === "ArrowLeft" || e.key === "Backspace") {
+          handlePrevStage();
+        } else if (e.key === "Escape") {
+          onAbort();
+        }
+        return;
+      }
+
       if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         if (!isTypewriterDone) {
           setTypewriterIndex(activeText.length);
-        } else if (phase !== "STAGE_7" && phase !== "STAGE_GAME_READY") {
+        } else if (phase !== "STAGE_GAME_READY") {
           handleNextStage();
         }
       } else if (e.key === "ArrowLeft") {
@@ -403,7 +654,17 @@ export default function MarsMission({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isTypewriterDone, activeText.length, phase, handleNextStage, handlePrevStage, onAbort]);
+  }, [
+    isTypewriterDone,
+    activeText.length,
+    phase,
+    handleNextStage,
+    handlePrevStage,
+    handleToggleSolutionSlide,
+    handleSelectSolution,
+    handleSelectSamplingSite,
+    onAbort,
+  ]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-stone-950 text-stone-100 select-none flex flex-col font-sans">
@@ -495,7 +756,10 @@ export default function MarsMission({
 
           {MARS_STAGES.map((st) => {
             const isCurrent = phase === st.id;
-            const currentNum = currentStage?.stageNumber || 0;
+            const currentNum =
+              phase === "SAMPLING_SITE_MAP" || phase === "SAMPLING_SITE_VIEW"
+                ? 8
+                : currentStage?.stageNumber || 0;
             const isCompleted = currentNum > st.stageNumber;
             return (
               <button
@@ -518,11 +782,32 @@ export default function MarsMission({
               </button>
             );
           })}
+
+          <button
+            type="button"
+            onClick={() => {
+              sfx.playClick(720);
+              transitionToPhase("SAMPLING_SITE_MAP");
+            }}
+            className={`px-2 py-1 text-[9px] font-press-start transition-all cursor-pointer ${
+              phase === "SAMPLING_SITE_MAP" || phase === "SAMPLING_SITE_VIEW"
+                ? "bg-cyan-400 text-slate-950 font-bold shadow-[0_0_10px_#22d3ee]"
+                : "bg-stone-900 text-stone-400 hover:text-cyan-300"
+            }`}
+            title="Jezero Crater Sampling Site Map"
+          >
+            MAP
+          </button>
         </div>
 
         {/* Right: Auto-Advance Toggle & SFX Toggle */}
         <div className="flex items-center gap-2">
-          {phase !== "BRIEFING_INTRO" && phase !== "STAGE_7" && phase !== "STAGE_GAME_READY" && (
+          {phase !== "BRIEFING_INTRO" &&
+            phase !== "PHASE_A_SOLUTIONS" &&
+            phase !== "STAGE_7" &&
+            phase !== "SAMPLING_SITE_MAP" &&
+            phase !== "SAMPLING_SITE_VIEW" &&
+            phase !== "STAGE_GAME_READY" && (
             <button
               type="button"
               onClick={() => {
@@ -629,7 +914,7 @@ export default function MarsMission({
                       ? "CLICK TO FAST-FORWARD..."
                       : briefingPage < introBriefingPages.length - 1
                         ? `PART ${briefingPage + 1} / ${introBriefingPages.length} — CLICK TO CONTINUE`
-                        : "READY FOR HEAVY-LIFT IGNITION"}
+                        : "READY FOR ROVER SELECTION"}
                   </span>
 
                   <button
@@ -649,10 +934,184 @@ export default function MarsMission({
                       ? "[ FAST-FORWARD ]"
                       : briefingPage < introBriefingPages.length - 1
                         ? "[ NEXT > ]"
-                        : "[ START MISSION > ]"}
+                        : "[ EVALUATE ROVER SOLUTIONS > ]"}
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE A2: 2-SLIDE MARS ROVER SOLUTION SELECTOR              */}
+        {/* (/images/WhatsApp Image 2026-11-15 at 14.26.35 (1).jpeg)    */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "PHASE_A_SOLUTIONS" && (
+          <div
+            className="fixed inset-0 z-30 bg-black overflow-hidden select-none"
+            onTouchStart={(e) => {
+              swipeStartXRef.current = e.touches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(e) => {
+              if (swipeStartXRef.current === null) return;
+              const endX = e.changedTouches[0]?.clientX ?? swipeStartXRef.current;
+              const deltaX = endX - swipeStartXRef.current;
+              if (Math.abs(deltaX) > 40) {
+                handleToggleSolutionSlide(deltaX < 0 ? 1 : -1);
+              }
+              swipeStartXRef.current = null;
+            }}
+            onMouseDown={(e) => {
+              swipeStartXRef.current = e.clientX;
+            }}
+            onMouseUp={(e) => {
+              if (swipeStartXRef.current === null) return;
+              const deltaX = e.clientX - swipeStartXRef.current;
+              if (Math.abs(deltaX) > 50) {
+                handleToggleSolutionSlide(deltaX < 0 ? 1 : -1);
+              }
+              swipeStartXRef.current = null;
+            }}
+          >
+            {/* Full-screen HUD Frame Background Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/WhatsApp Image 2026-11-15 at 14.26.35 (1).jpeg"
+              alt="Mars Rover Architecture Trade Study HUD"
+              className="w-full h-full object-cover object-center pointer-events-none select-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Top-Left Back to Briefing Button */}
+            <div className="absolute top-3 left-4 z-20 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick(520);
+                  transitionToPhase("BRIEFING_INTRO");
+                }}
+                className="px-3 py-1.5 bg-slate-950/90 hover:bg-slate-900 border-2 border-cyan-400 text-cyan-200 font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+              >
+                &lt; BRIEFING
+              </button>
+            </div>
+
+            {/* TOP HEADER AREA (Inside Upper Cyan Frame Above Green/Red Boxes) */}
+            <div className="absolute left-[14.5%] right-[12.5%] top-[9.5%] h-[25.5%] flex flex-col items-center justify-center text-center px-3 sm:px-6">
+              <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-slate-950/85 border border-cyan-400/80 text-cyan-300 font-silkscreen text-[10px] sm:text-xs mb-1.5 shadow-[2px_2px_0px_#000]">
+                <span>MARS SURFACE ROVER SELECTION TRADE STUDY</span>
+                <span className="text-amber-300 font-bold">
+                  [{activeSolutionSlide.slideNumber} / {MARS_ROVER_SOLUTIONS.length}]
+                </span>
+              </div>
+
+              <h1 className="font-press-start text-sm sm:text-xl md:text-2xl lg:text-3xl text-white tracking-wider drop-shadow-[0_3px_0px_#000] uppercase">
+                {activeSolutionSlide.title}
+              </h1>
+
+              <p className="font-silkscreen text-[10px] sm:text-xs text-cyan-200 mt-1.5 tracking-wide drop-shadow-[1px_1px_0px_#000]">
+                {activeSolutionSlide.subtitle}
+              </p>
+
+              {/* Slide Dots + Direct Switch Buttons */}
+              <div className="flex items-center gap-3 mt-2">
+                {MARS_ROVER_SOLUTIONS.map((sol, idx) => (
+                  <button
+                    key={sol.id}
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick(660);
+                      setSolutionSlideIndex(idx);
+                    }}
+                    className={`px-2.5 py-0.5 font-press-start text-[8px] sm:text-[9px] border transition-all cursor-pointer ${
+                      idx === solutionSlideIndex
+                        ? "bg-cyan-400 text-slate-950 border-white shadow-[0_0_10px_rgba(34,211,238,0.9)]"
+                        : "bg-slate-950/80 text-cyan-300 border-cyan-400/50 hover:border-cyan-300"
+                    }`}
+                  >
+                    SOLUTION {sol.slideNumber}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* LEFT PIXEL ARROW BUTTON (<) */}
+            <button
+              type="button"
+              onClick={() => handleToggleSolutionSlide(-1)}
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-14 sm:w-12 sm:h-16 bg-slate-950/90 hover:bg-cyan-400 text-cyan-300 hover:text-slate-950 border-2 border-cyan-400 hover:border-white flex items-center justify-center shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn transition-colors"
+              title="Previous Solution (Left Arrow)"
+            >
+              <ChevronLeft className="w-6 h-6 sm:w-7 sm:h-7" />
+            </button>
+
+            {/* RIGHT PIXEL ARROW BUTTON (>) */}
+            <button
+              type="button"
+              onClick={() => handleToggleSolutionSlide(1)}
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-14 sm:w-12 sm:h-16 bg-slate-950/90 hover:bg-cyan-400 text-cyan-300 hover:text-slate-950 border-2 border-cyan-400 hover:border-white flex items-center justify-center shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn transition-colors"
+              title="Next Solution (Right Arrow)"
+            >
+              <ChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
+            </button>
+
+            {/* LEFT GREEN BOX (PROS) — Aligned Inside Left Green Translucent Panel */}
+            <div className="absolute left-[17.3%] w-[33.8%] top-[38%] bottom-[15%] p-3 sm:p-5 md:p-6 flex flex-col justify-center overflow-hidden">
+              <div className="border-b-2 border-emerald-200/60 pb-1.5 sm:pb-2 mb-2.5 sm:mb-4 flex items-center justify-between">
+                <h2 className="font-press-start text-xs sm:text-base md:text-xl text-emerald-100 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+                  PROS
+                </h2>
+                <span className="font-silkscreen text-[9px] sm:text-[10px] px-2 py-0.5 bg-emerald-950/80 border border-emerald-300/60 text-emerald-200">
+                  ADVANTAGES
+                </span>
+              </div>
+
+              <ul className="space-y-2 sm:space-y-3.5">
+                {activeSolutionSlide.pros.map((pro, idx) => (
+                  <li
+                    key={idx}
+                    className="font-vt323 text-lg sm:text-2xl md:text-3xl text-white leading-tight drop-shadow-[2px_2px_0px_#000] flex items-start gap-2"
+                  >
+                    <span className="text-emerald-200 font-bold shrink-0">&bull;</span>
+                    <span>{pro}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* RIGHT RED BOX (CONS) — Aligned Inside Right Red Translucent Panel */}
+            <div className="absolute left-[53%] w-[33.8%] top-[38%] bottom-[15%] p-3 sm:p-5 md:p-6 flex flex-col justify-center overflow-hidden">
+              <div className="border-b-2 border-rose-200/60 pb-1.5 sm:pb-2 mb-2.5 sm:mb-4 flex items-center justify-between">
+                <h2 className="font-press-start text-xs sm:text-base md:text-xl text-rose-100 tracking-wider drop-shadow-[2px_2px_0px_#000]">
+                  CONS
+                </h2>
+                <span className="font-silkscreen text-[9px] sm:text-[10px] px-2 py-0.5 bg-rose-950/80 border border-rose-300/60 text-rose-200">
+                  TRADE-OFFS
+                </span>
+              </div>
+
+              <ul className="space-y-2 sm:space-y-3.5">
+                {activeSolutionSlide.cons.map((con, idx) => (
+                  <li
+                    key={idx}
+                    className="font-vt323 text-lg sm:text-2xl md:text-3xl text-white leading-tight drop-shadow-[2px_2px_0px_#000] flex items-start gap-2"
+                  >
+                    <span className="text-rose-200 font-bold shrink-0">&bull;</span>
+                    <span>{con}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* BOTTOM-RIGHT [ SELECT ] BUTTON (Masks Static "select" Text in Corner) */}
+            <div className="absolute bottom-0 right-0 z-20 bg-slate-950 px-3 py-2.5 sm:px-5 sm:py-3 border-t-2 border-l-2 border-cyan-400/80 shadow-[-4px_-4px_0px_#000] flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSelectSolution}
+                className="px-5 py-2.5 sm:px-7 sm:py-3 bg-cyan-400 hover:bg-cyan-300 border-2 border-white text-slate-950 font-press-start text-xs sm:text-sm font-bold uppercase tracking-wider shadow-[4px_4px_0px_#000] hover:shadow-[0_0_16px_rgba(34,211,238,0.9)] cursor-pointer arcade-btn animate-pulse"
+              >
+                [ SELECT ]
+              </button>
             </div>
           </div>
         )}
@@ -782,14 +1241,14 @@ export default function MarsMission({
               </div>
             </div>
 
-            {/* Stage 7 Summary Text & Return Action Row */}
+            {/* Stage 7 Summary Text & Proceed to Sampling Map Action Row */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="space-y-1 text-center md:text-left">
                 <span className="text-[10px] font-press-start text-amber-300 uppercase tracking-widest block">
-                  - TOUCHDOWN CONFIRMED // CMDR {playerName.toUpperCase()} -
+                  {`- TOUCHDOWN CONFIRMED // CMDR ${playerName.toUpperCase()} // ROVER: ${chosenRoverDef.shortName} -`}
                 </span>
                 <p className="font-vt323 text-lg sm:text-xl text-stone-100 leading-snug">
-                  &ldquo;Perseverance is safely on the surface at Jezero Crater (0.38g). All 7 interplanetary transit and EDL stages completed nominally!&rdquo;
+                  &ldquo;{chosenRoverDef.shortName} is safely on the surface at Jezero Crater (0.38g). Proceed to the Jezero Crater orbital surface map to choose your target sampling site!&rdquo;
                 </p>
               </div>
 
@@ -806,17 +1265,210 @@ export default function MarsMission({
                   <span>[ REPLAY ]</span>
                 </button>
 
-                <SciFiHudButton
-                  onClick={onAbort}
-                  theme="orange"
-                  code="MARS_07"
-                  systemStatus="MISSION COMPLETE"
-                  size="md"
-                  showTelemetryBlock={false}
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfx.playClick(760);
+                    transitionToPhase("SAMPLING_SITE_MAP");
+                  }}
+                  className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 border-2 border-white text-slate-950 font-press-start text-[10px] sm:text-xs font-bold flex items-center gap-2 shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn animate-pulse"
                 >
-                  <span>RETURN TO MISSION SELECT</span>
-                </SciFiHudButton>
+                  <span>[ SELECT SAMPLING SITE &gt; ]</span>
+                  <ChevronRight className="w-4 h-4 text-slate-950" />
+                </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE E1: INTERACTIVE MARS JEZERO CRATER SAMPLING SITE MAP  */}
+        {/* (/images/WhatsApp Image 2026-11-15 at 15.23.52.jpg)         */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "SAMPLING_SITE_MAP" && (
+          <div className="fixed inset-0 z-30 bg-black overflow-hidden select-none">
+            {/* Full-screen Jezero Crater Sampling Area Photograph */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/WhatsApp Image 2026-11-15 at 15.23.52.jpg"
+              alt="Mars Jezero Crater Sampling Site Selector"
+              className="w-full h-full object-cover object-center pointer-events-none select-none"
+              style={{ imageRendering: "auto" }}
+            />
+
+            {/* Top HUD Header Bar */}
+            <div className="absolute top-3 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+              <div className="flex items-center gap-2 pointer-events-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfx.playClick(560);
+                    transitionToPhase("STAGE_7");
+                  }}
+                  className="px-3 py-1.5 bg-stone-950/90 hover:bg-stone-900 border-2 border-cyan-400 text-cyan-200 font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+                >
+                  &lt; STAGE 7
+                </button>
+
+                <div className="px-3 py-1.5 bg-stone-950/90 border-2 border-cyan-400/80 shadow-[3px_3px_0px_#000] flex items-center gap-2">
+                  <span className="w-2 h-2 bg-cyan-400 animate-ping" />
+                  <span className="font-press-start text-[9px] sm:text-[10px] text-cyan-200 tracking-wider">
+                    JEZERO CRATER // CLICK A CYAN TARGET CIRCLE TO DEPLOY {chosenRoverDef.shortName}
+                  </span>
+                </div>
+              </div>
+
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-stone-950/90 border-2 border-orange-400/80 font-silkscreen text-[10px] text-amber-200 shadow-[3px_3px_0px_#000]">
+                <span>ACTIVE ROVER:</span>
+                <strong className="text-white">{chosenRoverDef.shortName}</strong>
+                <span className="text-cyan-300">| DELAY: 20 MIN ONE-WAY</span>
+              </div>
+            </div>
+
+            {/* 3 Interactive Sampling Sites (Opaque HUD Labels + Glowing Cyan Circle Hotspots) */}
+            {MARS_SAMPLING_SITES.map((site) => {
+              const isHovered = hoveredSamplingSite === site.id;
+              return (
+                <React.Fragment key={site.id}>
+                  {/* High-Contrast 16-bit HUD Tag Covering Static "sampling area X" Text */}
+                  <button
+                    type="button"
+                    onMouseEnter={() => {
+                      setHoveredSamplingSite(site.id);
+                      sfx.playBlip(680 + site.areaNumber * 70);
+                    }}
+                    onMouseLeave={() => setHoveredSamplingSite(null)}
+                    onClick={() => handleSelectSamplingSite(site.id)}
+                    style={{
+                      left: site.labelLeft,
+                      top: site.labelTop,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                    className={`absolute z-20 min-w-[185px] sm:min-w-[235px] md:min-w-[265px] min-h-[12.2%] px-3 py-2 sm:px-4 sm:py-2.5 border-2 transition-all duration-150 flex flex-col items-center justify-center text-center cursor-pointer shadow-[4px_4px_0px_#000] ${
+                      isHovered
+                        ? "bg-cyan-950 border-white scale-105 shadow-[0_0_20px_rgba(34,211,238,0.95)]"
+                        : "bg-stone-950 border-cyan-400 hover:border-white"
+                    }`}
+                  >
+                    <span className="font-silkscreen text-[8px] sm:text-[10px] text-cyan-300 tracking-widest uppercase mb-0.5">
+                      {site.code}
+                    </span>
+                    <span className="font-press-start text-[9px] sm:text-[11px] md:text-xs text-white leading-snug drop-shadow-[1px_1px_0px_#000]">
+                      {site.label}
+                    </span>
+                  </button>
+
+                  {/* Clickable Glowing Cyan Circle Hotspot Aligned Over Image's Cyan Oval */}
+                  <button
+                    type="button"
+                    aria-label={`Select ${site.label}`}
+                    onMouseEnter={() => {
+                      setHoveredSamplingSite(site.id);
+                      sfx.playBlip(680 + site.areaNumber * 70);
+                    }}
+                    onMouseLeave={() => setHoveredSamplingSite(null)}
+                    onClick={() => handleSelectSamplingSite(site.id)}
+                    style={{
+                      left: site.circleLeft,
+                      top: site.circleTop,
+                      width: site.circleWidth,
+                      height: site.circleHeight,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                    className={`absolute z-20 rounded-[50%] border-[3px] sm:border-4 transition-all duration-200 flex items-center justify-center cursor-pointer group ${
+                      isHovered
+                        ? "border-white bg-cyan-400/35 scale-110 shadow-[0_0_28px_rgba(34,211,238,1),inset_0_0_18px_rgba(34,211,238,0.8)]"
+                        : "border-cyan-300/90 bg-cyan-400/15 hover:bg-cyan-400/30 shadow-[0_0_16px_rgba(34,211,238,0.75)] animate-pulse"
+                    }`}
+                  >
+                    <span
+                      className={`px-2 py-0.5 font-press-start text-[8px] sm:text-[9px] border transition-all ${
+                        isHovered
+                          ? "bg-cyan-300 text-slate-950 border-white scale-105 shadow-[2px_2px_0px_#000]"
+                          : "bg-stone-950/90 text-cyan-200 border-cyan-400/80"
+                      }`}
+                    >
+                      {isHovered ? "[ DEPLOY HERE ]" : `AREA 0${site.areaNumber}`}
+                    </span>
+                  </button>
+                </React.Fragment>
+              );
+            })}
+
+            {/* Bottom-Right Mars Rover HUD Telemetry Badge (Cleanly Masks Screenshot Notification Box) */}
+            <div className="absolute bottom-0 right-0 z-20 w-[30%] min-w-[260px] sm:min-w-[330px] min-h-[10.5%] bg-stone-950 border-t-2 border-l-2 border-cyan-400 px-3.5 py-2.5 sm:px-5 sm:py-3 shadow-[-4px_-4px_0px_#000] flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-emerald-400 animate-ping shrink-0" />
+                  <span className="font-press-start text-[8px] sm:text-[10px] text-cyan-300 tracking-wider">
+                    JEZERO CRATER // SELECT TARGET SITE
+                  </span>
+                </div>
+                <span className="font-silkscreen text-[9px] text-amber-300 shrink-0">
+                  0.38G
+                </span>
+              </div>
+              <p className="font-silkscreen text-[9px] sm:text-[10px] text-stone-300 mt-1 truncate">
+                {hoveredSamplingSite
+                  ? MARS_SAMPLING_SITES.find((s) => s.id === hoveredSamplingSite)?.geologyType
+                  : `ROVER: ${chosenRoverDef.shortName} // CLICK ANY CYAN RING (1-3)`}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {/* PHASE E2: SELECTED SAMPLING SITE VIEW                       */}
+        {/* (Ready for site-specific drilling/analysis mini-game)       */}
+        {/* ═══════════════════════════════════════════════════════════ */}
+        {phase === "SAMPLING_SITE_VIEW" && (
+          <div className="my-auto mx-auto w-full max-w-3xl bg-stone-950/95 border-2 border-cyan-400 p-5 sm:p-7 shadow-[8px_8px_0px_#000] space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-cyan-400/40 pb-3">
+              <div>
+                <span className="font-silkscreen text-xs text-cyan-300 block">
+                  {`${activeSamplingSiteDef.code} // ACTIVE ROVER: ${chosenRoverDef.shortName}`}
+                </span>
+                <h2 className="font-press-start text-base sm:text-xl text-white mt-1">
+                  {activeSamplingSiteDef.label}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick(580);
+                  transitionToPhase("SAMPLING_SITE_MAP");
+                }}
+                className="px-3.5 py-2 bg-stone-900 hover:bg-stone-800 border-2 border-cyan-400 text-cyan-200 hover:text-white font-press-start text-[9px] sm:text-[10px] shadow-[3px_3px_0px_#000] cursor-pointer arcade-btn"
+              >
+                [ &lt; BACK TO SITE MAP ]
+              </button>
+            </div>
+
+            <div className="bg-stone-900/90 border border-cyan-400/50 p-4 space-y-2">
+              <div className="font-press-start text-[10px] text-amber-300">
+                GEOLOGICAL CLASSIFICATION: {activeSamplingSiteDef.geologyType}
+              </div>
+              <p className="font-vt323 text-xl sm:text-2xl text-stone-100 leading-snug">
+                {activeSamplingSiteDef.scientificSummary}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <span className="font-silkscreen text-xs text-emerald-300">
+                STATUS: SITE LOCKED — READY FOR ROVER COMMAND QUEUE &amp; CORE DRILLING
+              </span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick(640);
+                  transitionToPhase("SAMPLING_SITE_MAP");
+                }}
+                className="px-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 border-2 border-white text-slate-950 font-press-start text-[10px] font-bold shadow-[4px_4px_0px_#000] cursor-pointer arcade-btn"
+              >
+                [ CHANGE TARGET SITE ]
+              </button>
             </div>
           </div>
         )}
